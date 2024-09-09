@@ -1,0 +1,26 @@
+#!/bin/sh
+commit_msg=$(cat "$1")
+
+# Check if the commit message is empty
+if [ -z "$commit_msg" ]; then
+  echo "Error: Commit message cannot be empty."
+  exit 1
+fi
+
+# Check if the commit message follows the conventional format
+if ! echo "$commit_msg" | grep -qE "^(added|feat|fix|docs|style|refactor|test|chore): .+"; then
+  echo "Error: Commit message must start with a valid type (added, feat, fix, docs, style, refactor, test, chore) followed by a colon and a space."
+  echo ""
+  echo "Valid commit types:"
+  echo "  added:    Custom commit message with description of changes."
+  echo "  feat:     A new feature for the user."
+  echo "  fix:      A bug fix."
+  echo "  docs:     Documentation only changes."
+  echo "  style:    Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.)."
+  echo "  refactor: A code change that neither fixes a bug nor adds a feature."
+  echo "  test:     Adding missing tests or correcting existing tests."
+  echo "  chore:    Changes to the build process or auxiliary tools and libraries such as documentation generation."
+  echo "            The chore type is used for tasks that don’t modify the source code directly but are necessary"
+  echo "            for the project setup and maintenance."
+  exit 1
+fi
