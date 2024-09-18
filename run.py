@@ -26,7 +26,7 @@ def setup_logging():
 def check_database_connection():
     try:
         with app.app_context():
-            db.engine.execute("SELECT 1")  # A lightweight query to test connection
+            db.engine.connect()
             print("Database connected successfully.")
     except OperationalError as e:
         error_message = "Error during connecting to the database."
