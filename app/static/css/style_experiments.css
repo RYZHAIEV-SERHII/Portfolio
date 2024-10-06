@@ -894,17 +894,18 @@ section .container {
 .interests .icon-box {
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 10px;
   background: #0e3057;
   transition: ease-in-out 0.3s;
   border-radius: 8px;
+  height: 96px;
 }
 
-
-.interests .icon-box i {
-  font-size: 32px;
+.interests .icon-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover; /* Ensures the image covers the box without distortion */
   padding-right: 10px;
-  line-height: 1;
 }
 
 .interests .icon-box h3 {

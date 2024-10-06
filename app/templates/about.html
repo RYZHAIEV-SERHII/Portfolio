@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- ======= About Section ======= -->
+<section id="about" class="about">
+
+    <!-- ======= About Me ======= -->
+    <div class="about-me container">
+
+        <div class="section-title">
+            <h2>About</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4" data-aos="fade-right">
+                <img src="{{ url_for('static', filename='img/profile.png') }}" class="img-fluid" alt="">
+            </div>
+            <div class="col-lg-8 pt-4 pt-lg-0 content" data-aos="fade-left">
+                <h3>👋 Hello!</h3>
+
+                <p>I’m <strong>Serhii</strong>, aspiring Junior Python Developer with a solid foundation in web
+                    development through a comprehensive Python Developer course and self-paced study. Passionate about
+                    learning new technologies and improving coding skills. Experienced in building various pet projects,
+                    including a Telegram bot and a blog platform.</p>
+
+                <h4>🚀 My Mission</h4>
+
+                <p>I’m eager to explore new technologies and best practices. I thrive on solving complex
+                    problems and turning ideas into reality. My goal is to stay at the forefront of the tech landscape,
+                    continuously improving and expanding my expertise.</p>
+
+                <h4>📫 Let’s Connect!</h4>
+
+                <p>I’m always open to collaborations and exciting projects. Whether you’re a fellow developer or a tech
+                    enthusiast, I’m eager to connect and build something amazing together. Let’s turn ideas into
+                    reality!
+                    <br/>
+                    Happy coding! 🖥️</p>
+
+            </div>
+        </div>
+
+    </div><!-- End About Me -->
+
+    <!-- ======= Interests ======= -->
+    <div class="interests container">
+
+        <div class="section-title">
+            <h2>Interests</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-md-4">
+                <div class="icon-box">
+                    <img src="{{ url_for('static', filename='img/interests/developing.png') }}" class="img-fluid"
+                         alt="">
+                    <h3>Web Development</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mt-4 mt-md-0">
+                <div class="icon-box">
+                    <img src="{{ url_for('static', filename='img/interests/api-development.png') }}" class="img-fluid"
+                         alt="">
+                    <h3>API Development</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mt-4 mt-md-0">
+                <div class="icon-box">
+                    <img src="{{ url_for('static', filename='img/interests/script.png') }}" class="img-fluid"
+                         alt="">
+                    <h3>Automation</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mt-4 mt-lg-0">
+                <div class="icon-box">
+                    <img src="{{ url_for('static', filename='img/interests/programming_ai.png') }}" class="img-fluid"
+                         alt="">
+                    <h3>Artificial Intelligence</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mt-4">
+                <div class="icon-box">
+                    <img src="{{ url_for('static', filename='img/interests/shopping.png') }}" class="img-fluid"
+                         alt="">
+                    <h3>E-commerce Development</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mt-4">
+                <div class="icon-box">
+                    <img src="{{ url_for('static', filename='img/interests/nlp.png') }}" class="img-fluid"
+                         alt="">
+                    <h3>Natural Language Processing (NLP)</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mt-4">
+                <div class="icon-box">
+                    <img src="{{ url_for('static', filename='img/interests/assistant.png') }}" class="img-fluid"
+                         alt="">
+                    <h3>Bot Development</h3>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mt-4">
+                <div class="icon-box">
+                    <img src="{{ url_for('static', filename='img/interests/money.png') }}" class="img-fluid"
+                         alt="">
+                    <h3>Freelancing and Consulting</h3>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- End Interests -->
+</section><!-- End About Section -->
+{% endblock %}
