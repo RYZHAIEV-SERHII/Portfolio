@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Start Contact Section -->
+
+<section id="contacts" class="contact">
+    <div class="container">
+
+        <div class="section-title">
+            <h2>Contact</h2>
+        </div>
+
+        <div class="row mt-2">
+
+            <div class="col-md-6 d-flex align-items-stretch">
+                <div class="info-box">
+                    <i class="bx bx-map"></i>
+                    <h3>My Address</h3>
+                    <p>Ukraine, Vinnytsia</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 mt-4 mt-md-0 d-flex align-items-stretch">
+                <div class="info-box">
+                    <i class="bx bx-share-alt"></i>
+                    <h3>Social Profiles</h3>
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/in/serhii-ryzhaiev" target="_blank" class="linkedin"><i
+                                class="bx bxl-linkedin"></i></a>
+                        <a href="https://github.com/RYZHAIEV-SERHII" target="_blank" class="github"><i
+                                class="bx bxl-github"></i></a>
+                        <a href="https://gitlab.com/RYZHAIEV-SERHII" target="_blank" class="gitlab"><i
+                                class="bx bxl-gitlab"></i></a>
+                        <a href="https://t.me/CTAJIKEP" target="_blank" class="telegram"><i
+                                class="bx bxl-telegram"></i></a>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mt-4 d-flex align-items-stretch">
+                <div class="info-box">
+                    <i class="bx bx-envelope"></i>
+                    <h3>Email</h3>
+                    <p><a href="mailto:serhii.ryzhaiev@gmail.com" target="_blank" class="google">
+                        serhii.ryzhaiev@gmail.com </a>
+                    </p>
+
+                </div>
+            </div>
+            <div class="col-md-6 mt-4 d-flex align-items-stretch">
+                <div class="info-box">
+                    <i class="bx bx-phone-call"></i>
+                    <h3>Phone</h3>
+                    <p>+38 (097) 806 87 46</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Contact Form-->
+    <div class="container mt-5">
+        <h3 class="text-center">Contact Me</h3>
+        <form method="POST" action="/contact">
+            {{ form.hidden_tag() }}
+            <div class="row gy-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control") }}
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        {{ form.category.label(class="form-label") }}
+                        <div class="btn-group" role="group" aria-label="Category buttons">
+                            {% for subfield in form.category %}
+                            <input type="radio" class="btn-check" name="{{ form.category.name }}" id="{{ subfield.id }}"
+                                   autocomplete="off" value="{{ subfield.data }}">
+                            <label class="btn btn-outline-primary" for="{{ subfield.id }}">{{ subfield.label.text
+                                }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        {{ form.message.label(class="form-label") }}
+                        {{ form.message(class="form-control", rows=4) }}
+                    </div>
+                </div>
+                <div class="col-md-12 text-center">
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+</section>
+
+<!-- End Contact Section -->
+
+{% endblock %}

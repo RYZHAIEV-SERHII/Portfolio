@@ -1,4 +1,9 @@
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, render_template, request, abort, flash, redirect, url_for
+
+from .forms import ContactForm
+from .mail import send_email_notification
+from .models import ContactMessage
+from .models import db
 
 main = Blueprint("main", __name__)
 
@@ -28,9 +33,23 @@ def project_detail(project_name):
         abort(404)  # Return a 404 error if the template does not exist
 
 
-@main.route("/contact")
+@main.route("/contact", methods=["GET", "POST"])
 def contact():
-    return render_template("contact.html")
+    form = ContactForm()
+    if request.method == "POST" and form.validate():
+        name = form.name.data
+        email = form.email.data
+        category = form.category.data
+        message = form.message.data
+        contact_message = ContactMessage(
+            name=name, email=email, category=category, message=message
+        )
+        db.session.add(contact_message)
+        db.session.commit()
+        send_email_notification(name, email, category, message)
+        flash("Form submitted successfully", "success")
+        return redirect(url_for("main.home"))
+    return render_template("contact.html", form=form)
 
 
 @main.route("/skills")
@@ -45,4 +64,6 @@ def education():
 
 @main.route("/resume")
 def resume():
-    return render_template("resume.html")
+    return redirect(
+        "https://drive.google.com/file/d/1fuxAUUEq0fLgF8xMh4a1IiMAl22fzEud/view?usp=drive_link"
+    )

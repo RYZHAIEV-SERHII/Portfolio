@@ -10,8 +10,10 @@ fastapi==0.114.0
 filelock==3.16.0
 flake8==7.1.1
 Flask==3.0.3
+Flask-Mail==0.10.0
 Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
+Flask-WTF==1.2.2
 greenlet==3.0.3
 h11==0.14.0
 identify==2.6.0
@@ -42,3 +44,4 @@ typing_extensions==4.12.2
 uvicorn==0.30.6
 virtualenv==20.26.4
 Werkzeug==3.0.4
+WTForms==3.2.1
