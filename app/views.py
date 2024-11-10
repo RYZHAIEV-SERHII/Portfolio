@@ -2,25 +2,20 @@ from flask import Blueprint, render_template, request, abort, flash, redirect, u
 
 from .forms import ContactForm
 from .mail import send_email_notification
-from .models import ContactMessage
-from .models import db
+from .models import ContactMessage, db
 
 main = Blueprint("main", __name__)
 
 
 @main.route("/")
-def home():
-    return render_template("index.html")
-
-
 @main.route("/about")
-def about():
-    return render_template("about.html")
-
-
+@main.route("/education")
+@main.route("/skills")
 @main.route("/projects")
-def projects():
-    return render_template("projects.html")
+def render_page():
+    # Render the template matching the route name
+    page = request.path.lstrip("/") or "index"  # Handles root '/' route as 'index'
+    return render_template(f"{page}.html")
 
 
 @main.route("/projects/<project_name>")
@@ -31,6 +26,13 @@ def project_detail(project_name):
         return render_template(template_path)
     except Exception:
         abort(404)  # Return a 404 error if the template does not exist
+
+
+@main.route("/resume")
+def resume():
+    return redirect(
+        "https://drive.google.com/file/d/1fuxAUUEq0fLgF8xMh4a1IiMAl22fzEud/view?usp=drive_link"
+    )
 
 
 @main.route("/contact", methods=["GET", "POST"])
@@ -50,20 +52,3 @@ def contact():
         flash("Form submitted successfully", "success")
         return redirect(url_for("main.home"))
     return render_template("contact.html", form=form)
-
-
-@main.route("/skills")
-def skills():
-    return render_template("skills.html")
-
-
-@main.route("/education")
-def education():
-    return render_template("education.html")
-
-
-@main.route("/resume")
-def resume():
-    return redirect(
-        "https://drive.google.com/file/d/1fuxAUUEq0fLgF8xMh4a1IiMAl22fzEud/view?usp=drive_link"
-    )

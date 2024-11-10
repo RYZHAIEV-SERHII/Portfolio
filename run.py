@@ -43,4 +43,10 @@ if __name__ == "__main__":
 # Optional features to show my skills.
 # When it comes to deploying:
 # TODO: Deploy application on a robust production server like Gunicorn or uWSGI
+
+# In production, it's better to run Flask with a WSGI server like gunicorn or uWSGI
+# instead of using Flask’s built-in development server, which isn’t optimized for performance and scalability.
+# Example:
+# gunicorn -w 4 -b 0.0.0.0:5000 run:app
+
 # TODO: Setup a web server Nginx.
