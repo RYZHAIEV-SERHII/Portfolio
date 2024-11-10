@@ -1,0 +1,29 @@
+{% extends "projects/base_project_template.html" %}
+
+{% set title_content = "Personal portfolio" %}
+
+{% block title %}
+{{ title_content }}
+{% endblock %}
+
+{% block project_name %}
+{{ title_content }}
+{% endblock %}
+
+{% block tech_stack %}
+Python, Flask, FastAPI, SQLAlchemy, PostgreSQL
+{% endblock %}
+
+{% block github_url %}
+https://github.com/RYZHAIEV-SERHII/Portfolio
+{% endblock %}
+
+{% block project_description %}
+<samp>
+    This is my personal portfolio website built using Python, Flask, FastAPI, SQLAlchemy, and
+    PostgreSQL. <br>
+    <br>
+    The site showcases my projects, experience, and skills, while also serving as a
+    backend API for future integrations.
+</samp>
+{% endblock %}

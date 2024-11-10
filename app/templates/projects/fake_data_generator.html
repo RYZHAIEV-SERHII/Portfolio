@@ -1,0 +1,26 @@
+{% extends "projects/base_project_template.html" %}
+
+{% set title_content = " Fake Data Generator " %}
+
+{% block title %}
+{{ title_content }}
+{% endblock %}
+
+{% block project_name %}
+{{ title_content }}
+{% endblock %}
+
+{% block tech_stack %}
+Python, Faker, JSON, Tkinter
+{% endblock %}
+
+{% block github_url %}
+https://github.com/RYZHAIEV-SERHII/Fake_Data_Generator
+{% endblock %}
+
+{% block project_description %}
+<samp>
+    it`s a program to generate various fake data for some testing or just to fill some DataBase.<br>
+    It`s save data in JSON format in </samp><code>fake_data.json</code><samp> file.
+</samp>
+{% endblock %}
