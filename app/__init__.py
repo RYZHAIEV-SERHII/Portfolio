@@ -4,13 +4,16 @@ from dotenv import load_dotenv
 from flask import Flask
 
 from config import env_config
+from .db import init_db  # Import init_db function
 from .mail import mail
-from .models import db
 
 load_dotenv()
 
 
 def create_app():
+    """
+    Create and configure the Flask application.
+    """
     app = Flask(__name__)
 
     # Dynamically load environment config
@@ -18,7 +21,7 @@ def create_app():
     app.config.from_object(env_config[env])
 
     # Initialize the database with the app
-    db.init_app(app)
+    init_db(app)  # Use init_db function to initialize the database
 
     # Initialize the mail extension
     mail.init_app(app)

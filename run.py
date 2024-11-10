@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import OperationalError
 
 from app import create_app
-from app.models import db
+from app.db import db
 
 app = create_app()
 
