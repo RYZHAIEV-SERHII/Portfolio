@@ -5,7 +5,7 @@ from flask import Flask
 
 from config import env_config
 from .db import init_db  # Import init_db function
-from .mail import mail
+from .mail import init_mail  # Import init_mail function
 
 load_dotenv()
 
@@ -24,7 +24,7 @@ def create_app():
     init_db(app)  # Use init_db function to initialize the database
 
     # Initialize the mail extension
-    mail.init_app(app)
+    init_mail(app)  # Use init_mail function to initialize the mail extension
 
     # Import and register routes
     from .views import main
