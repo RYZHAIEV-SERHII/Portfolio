@@ -1,17 +1,20 @@
 import uuid
 
 from sqlalchemy.dialects.postgresql import UUID
-
+from flask_login import UserMixin
 from .db import db
 
 
 # Define the User model
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "users"
     user_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.Text, nullable=False)
+    is_admin = db.Column(
+        db.Boolean, default=True
+    )  # Assume sole admin is true by default
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 
