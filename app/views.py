@@ -19,17 +19,20 @@ from .models import ContactMessage, Project, Image
 main = Blueprint("main", __name__)
 
 
+@main.route("/<page>")
 @main.route("/")
-@main.route("/about")
-@main.route("/education")
-@main.route("/skills")
-@main.route("/projects")
-def render_page():
+def render_page(page="index"):
     """
-    Render the page corresponding to the route.
+    Render the page based on the current route.
+    If route is one of the predefined routes: ("index", "about", "education", "skills", "projects")
+    then render the corresponding template.
     """
-    page = request.path.lstrip("/") or "index"  # Handles root '/' route as 'index'
-    return render_template(f"{page}.html")
+    try:
+        return render_template(
+            f"{page}.html"
+        )  # If no page is specified, default to "index"
+    except Exception:
+        abort(404)  # Return 404 if the template does not exist
 
 
 @main.route("/projects/<project_name>")

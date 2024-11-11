@@ -1,17 +1,17 @@
 <nav id="navmenu" class="navmenu">
     <ul>
-        <li><a href="{{ url_for('main.home') }}"
-               class="{{ 'active' if request.endpoint == 'main.home' else '' }}">Home</a></li>
-        <li><a href="{{ url_for('main.about') }}" class="{{ 'active' if request.endpoint == 'main.about' else '' }}">About</a>
-        </li>
-        <li><a href="{{ url_for('main.education') }}"
-               class="{{ 'active' if request.endpoint == 'main.education' else '' }}">Education</a></li>
-        <li><a href="{{ url_for('main.skills') }}" class="{{ 'active' if request.endpoint == 'main.skills' else '' }}">Skills</a>
-        </li>
-        <li><a href="{{ url_for('main.projects') }}"
-               class="{{ 'active' if request.endpoint == 'main.projects' else '' }}">Projects</a></li>
-        <li><a href="{{ url_for('main.resume') }}" class="{{ 'active' if request.endpoint == 'main.resume' else '' }}">Resume</a>
-        </li>
+        <li><a href="{{ url_for('main.render_page') }}"
+               class="{{ 'active' if request.path == '/' else '' }}">Home</a></li>
+        <li><a href="{{ url_for('main.render_page', page='about') }}"
+               class="{{ 'active' if request.path == '/about' else '' }}">About</a></li>
+        <li><a href="{{ url_for('main.render_page', page='education') }}"
+               class="{{ 'active' if request.path == '/education' else '' }}">Education</a></li>
+        <li><a href="{{ url_for('main.render_page', page='skills') }}"
+               class="{{ 'active' if request.path == '/skills' else '' }}">Skills</a></li>
+        <li><a href="{{ url_for('main.render_page', page='projects') }}"
+               class="{{ 'active' if request.path == '/projects' else '' }}">Projects</a></li>
+        <li><a href="{{ url_for('main.resume') }}"
+               class="{{ 'active' if request.endpoint == 'main.resume' else '' }}">Resume</a></li>
         <li><a href="{{ url_for('main.contact') }}"
                class="{{ 'active' if request.endpoint == 'main.contact' else '' }}">Contact</a></li>
     </ul>
