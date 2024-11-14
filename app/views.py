@@ -1,5 +1,3 @@
-import uuid
-
 from flask import (
     Blueprint,
     render_template,
@@ -9,12 +7,13 @@ from flask import (
     redirect,
     url_for,
     jsonify,
+    session,
 )
 
-from .db import db, convert_to_binary, write_to_file
+from .db import db, write_to_file
 from .forms import ContactForm
 from .mail import send_email_notification
-from .models import ContactMessage, Project, Image
+from .models import ContactMessage, Project, Image, Experience
 
 main = Blueprint("main", __name__)
 
@@ -76,7 +75,7 @@ def contact():
         db.session.commit()
         send_email_notification(name, email, category, message)
         flash("Form submitted successfully", "success")
-        return redirect(url_for("main.home"))
+        return redirect(url_for("main.render_page"))
     return render_template("contact.html", form=form)
 
 
@@ -85,30 +84,35 @@ def add_project():
     """
     Add a new project along with its image to the database.
     """
-    data = request.json
-    new_project = Project(
-        user_id=uuid.UUID(data["user_id"]),
-        title=data["title"],
-        description=data["description"],
-        url=data["url"],
-    )
+    data = request.get_json()
+    try:
+        new_project = Project(
+            user_id=data.get("user_id"),
+            title=data.get("title"),
+            description=data.get("description"),
+            url=data.get("url"),
+        )
 
-    image_path = data["image_path"]
-    binary_data = convert_to_binary(image_path)
-    new_image = Image(name=data["image_name"], data=binary_data, project=new_project)
+        image_data = request.get_data()
+        new_image = Image(
+            name=data.get("image_name"), data=image_data, project=new_project
+        )
 
-    db.session.add(new_project)
-    db.session.add(new_image)
-    db.session.commit()
-    return jsonify({"message": "Project and image added successfully"}), 201
+        db.session.add(new_project)
+        db.session.add(new_image)
+        db.session.commit()
+        return jsonify({"message": "Project and image added successfully"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
 
 
-@main.route("/get_project/<uuid:project_id>", methods=["GET"])
+@main.route("/get_project/<int:project_id>", methods=["GET"])
 def get_project(project_id):
     """
     Retrieve a project and its images from the database.
     """
-    project = Project.query.filter_by(project_id=project_id).first()
+    project = Project.query.filter_by(id=project_id).first()
     if not project:
         return jsonify({"message": "Project not found"}), 404
 
@@ -116,11 +120,22 @@ def get_project(project_id):
         "title": project.title,
         "description": project.description,
         "url": project.url,
-        "images": [],
+        "images": [{"name": image.name} for image in project.images],
     }
 
     for image in project.images:
         write_to_file(image.data, f"{image.name}.jpg")
-        response["images"].append({"name": image.name})
 
     return jsonify(response), 200
+
+
+@main.route("/admin/experiences", methods=["POST"])
+def create_experience():
+    user_id = session.get("user_id")
+    if user_id is None:
+        # Handle the case where the user is not logged in
+        return "Error: User is not logged in"
+    experience = Experience(user_id=user_id, **request.form.to_dict())
+    db.session.add(experience)
+    db.session.commit()
+    return "Experience created successfully"

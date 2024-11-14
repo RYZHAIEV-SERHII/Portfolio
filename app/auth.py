@@ -60,4 +60,15 @@ def logout():
 
 @login_manager.user_loader
 def load_user(user_id):
+    """
+    Load a user instance from the given user ID.
+
+    This function is expected to return an instance of the user class or None if the user does not exist.
+
+    Args:
+        user_id (UUID): Unique identifier for the user to load.
+
+    Returns:
+        User: The loaded user instance or None if no matching user was found.
+    """
     return User.query.get(user_id)
