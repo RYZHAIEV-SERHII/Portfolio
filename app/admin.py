@@ -5,7 +5,7 @@ from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 
 from .db import db
-from .forms import SkillForm
+from .forms import SkillForm, ExperienceForm
 from .models import (
     User,
     Project,
@@ -114,11 +114,92 @@ class SkillModelView(ModelView):
             return True
 
 
+class ExperienceModelView(ModelView):
+    """
+    A ModelView for experiences.
+
+    Attributes:
+        form (ExperienceForm): The form to use for creating and editing experiences.
+        column_labels (dict): A dictionary mapping column names to their
+            corresponding labels in the list view.
+        column_list (tuple): A tuple of column names to display in the list view.
+        column_editable_list (tuple): A tuple of column names that can be edited in the list view.
+        create_experience (func): A function to create a new experience instance from the form data.
+    """
+
+    form = ExperienceForm
+    column_labels = {
+        "company_name": "Company Name",
+        "role": "Role",
+        "start_date": "Start Date",
+        "end_date": "End Date",
+        "description": "Description",
+    }
+    column_list = (
+        "company_name",
+        "role",
+        "start_date",
+        "end_date",
+        "description",
+        "created_at",
+    )
+    column_filters = ("company_name", "role", "start_date", "end_date")
+    column_editable_list = (
+        "company_name",
+        "role",
+        "start_date",
+        "end_date",
+        "description",
+    )
+
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.is_admin
+
+    def create_experience(self, form: ExperienceForm) -> bool:
+        """
+        Creates a new experience instance from the form data.
+
+        Args:
+            form (ExperienceForm): The form containing the experience data.
+
+        Returns:
+            bool: True if the experience was created successfully, False otherwise.
+        """
+        try:
+            # Create a new experience instance from the form data
+            experience = Experience(
+                user_id=current_user.id,
+                company_name=form.company_name.data,
+                role=form.role.data,
+                start_date=form.start_date.data,
+                end_date=form.end_date.data,
+                description=form.description.data,
+            )
+            # Add the experience to the database session
+            db.session.add(experience)
+            # Commit the changes
+            db.session.commit()
+        except IntegrityError:
+            # Rollback the session if the experience already exists
+            db.session.rollback()
+            flash("Error: Experience already exists.", "error")
+            return False
+        except Exception as e:
+            # Rollback the session and flash an error message if any other exception occurs
+            db.session.rollback()
+            flash("Error: {}".format(e), "error")
+            return False
+        else:
+            # Flash a success message if the experience was created successfully
+            flash("Experience created successfully.", "success")
+            return True
+
+
 # Add views for your models
 admin.add_view(AdminModelView(User, db.session))
 admin.add_view(AdminModelView(Project, db.session))
 admin.add_view(AdminModelView(Image, db.session))
 admin.add_view(SkillModelView(Skill, db.session))
-admin.add_view(AdminModelView(Experience, db.session))
+admin.add_view(ExperienceModelView(Experience, db.session))
 admin.add_view(AdminModelView(ContactMessage, db.session))
 admin.add_view(AdminModelView(SkillCategory, db.session))

@@ -9,6 +9,7 @@ from wtforms import (
     EmailField,
     HiddenField,
     SelectField,
+    DateField,
 )
 from wtforms.validators import DataRequired, Length
 from wtforms_sqlalchemy.fields import QuerySelectField
@@ -79,6 +80,30 @@ class SkillForm(FlaskForm):
         ],
         validators=[DataRequired()],
     )
+    user_id = HiddenField(
+        "User ID", default=lambda: current_user.id if current_user else None
+    )
+
+
+class ExperienceForm(FlaskForm):
+    """
+    Form for adding a new experience.
+
+    Attributes:
+        company_name (StringField): Field for the name of the company.
+        role (StringField): Field for the role in the company.
+        start_date (DateField): Field for the start date of the experience.
+        end_date (DateField): Field for the end date of the experience.
+        description (TextAreaField): Field for the description of the experience.
+        user_id (HiddenField): Field for the user ID the experience belongs to.
+    """
+
+    company_name = StringField("Company Name", validators=[DataRequired()])
+    role = StringField("Role", validators=[DataRequired()])
+    start_date = DateField("Start Date", validators=[DataRequired()])
+    end_date = DateField("End Date")
+    description = TextAreaField("Description", validators=[DataRequired()])
+
     user_id = HiddenField(
         "User ID", default=lambda: current_user.id if current_user else None
     )
