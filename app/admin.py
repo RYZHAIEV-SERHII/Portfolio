@@ -5,7 +5,7 @@ from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 
 from .db import db
-from .forms import SkillForm, ExperienceForm
+from .forms import SkillForm, ExperienceForm, ProjectForm
 from .models import (
     User,
     Project,
@@ -14,6 +14,7 @@ from .models import (
     Experience,
     ContactMessage,
     SkillCategory,
+    ProjectCategory,
 )
 
 # Initialize Flask-Admin
@@ -195,11 +196,94 @@ class ExperienceModelView(ModelView):
             return True
 
 
+class ProjectModelView(ModelView):
+    """
+    Admin view for the Project model.
+
+    Attributes:
+        form (ProjectForm): The form to use for creating and editing projects.
+        column_labels (dict): A dictionary mapping column names to their
+            corresponding labels in the list view.
+        column_list (tuple): A tuple of column names to display in the list view.
+        column_filters (tuple): A tuple of column names to filter by in the list view.
+        column_editable_list (tuple): A tuple of column names that can be edited in the list view.
+    """
+
+    form = ProjectForm
+    column_labels = {
+        "title": "Title",
+        "description": "Description",
+        "url": "URL",
+        "tech_stack": "Tech Stack",
+        "project_category": "Project Category",
+    }
+    column_list = (
+        "title",
+        "description",
+        "url",
+        "tech_stack",
+        "project_category",
+        "created_at",
+    )
+    column_filters = ("title", "description", "url", "tech_stack", "project_category")
+    column_editable_list = (
+        "title",
+        "description",
+        "url",
+        "tech_stack",
+        "project_category",
+    )
+    backref_name = "project_list"
+
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.is_admin
+
+    def create_project(self, form: ProjectForm) -> bool:
+        """
+        Creates a new project instance from the form data.
+
+        Args:
+            form (ProjectForm): The form containing the project data.
+
+        Returns:
+            bool: True if the project was created successfully, False otherwise.
+        """
+        try:
+            # Create a new project instance from the form data
+            project = Project(
+                user_id=current_user.id,
+                title=form.title.data,
+                description=form.description.data,
+                url=form.url.data,
+                tech_stack=form.tech_stack.data,
+                project_category=form.project_category.data,
+            )
+            # Add the project to the database session
+            db.session.add(project)
+            # Commit the changes
+            db.session.commit()
+        except IntegrityError:
+            # Rollback the session if the project already exists
+            db.session.rollback()
+            flash("Error: Project already exists.", "error")
+            return False
+        except Exception as e:
+            # Rollback the session and flash an error message if any other exception occurs
+            db.session.rollback()
+            flash("Error: {}".format(e), "error")
+            return False
+        else:
+            # Flash a success message if the project was created successfully
+            flash("Project created successfully.", "success")
+            return True
+
+
 # Add views for your models
 admin.add_view(AdminModelView(User, db.session))
-admin.add_view(AdminModelView(Project, db.session))
+admin.add_view(ProjectModelView(Project, db.session))
+admin.add_view(AdminModelView(ProjectCategory, db.session))
 admin.add_view(AdminModelView(Image, db.session))
 admin.add_view(SkillModelView(Skill, db.session))
+admin.add_view(AdminModelView(SkillCategory, db.session))
 admin.add_view(ExperienceModelView(Experience, db.session))
 admin.add_view(AdminModelView(ContactMessage, db.session))
-admin.add_view(AdminModelView(SkillCategory, db.session))

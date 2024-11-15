@@ -45,8 +45,10 @@ class Project(db.Model):
         user_id (int): Foreign key referencing the User model.
         title (str): Title of the project.
         description (str): Description of the project.
+        tech_stack (str): Technologies used in the project.
         url (str): URL of the project.
         created_at (datetime): Timestamp when the project was created.
+        project_category_id (int): Foreign key referencing the ProjectCategory model.
     """
 
     __tablename__ = "projects"
@@ -54,9 +56,38 @@ class Project(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
+    tech_stack = db.Column(db.String(255))
     url = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    project_category_id = db.Column(
+        db.Integer, db.ForeignKey("project_categories.id"), nullable=False
+    )
     images = db.relationship("Image", back_populates="project")
+    project_category = db.relationship("ProjectCategory", back_populates="projects")
+
+
+# Define the ProjectCategory model
+class ProjectCategory(db.Model):
+    """
+    ProjectCategory model representing a project category.
+
+    Attributes:
+        __tablename__ (str): Name of the database table.
+        id (int): Unique identifier for the project category.
+        name (str): Name of the project category.
+        projects (list[Project]): The projects associated with this category.
+    """
+
+    __tablename__ = "project_categories"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    projects = db.relationship("Project", back_populates="project_category")
+
+    def __repr__(self):
+        return f"ProjectCategory('{self.name}')"
+
+    def __str__(self):
+        return self.name
 
 
 # Define the Image model

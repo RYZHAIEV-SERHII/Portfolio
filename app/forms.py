@@ -11,10 +11,10 @@ from wtforms import (
     SelectField,
     DateField,
 )
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, URL
 from wtforms_sqlalchemy.fields import QuerySelectField
 
-from .models import SkillCategory
+from .models import SkillCategory, ProjectCategory
 
 
 class ContactForm(FlaskForm):
@@ -104,6 +104,33 @@ class ExperienceForm(FlaskForm):
     end_date = DateField("End Date")
     description = TextAreaField("Description", validators=[DataRequired()])
 
+    user_id = HiddenField(
+        "User ID", default=lambda: current_user.id if current_user else None
+    )
+
+
+class ProjectForm(FlaskForm):
+    """
+    Form for adding a new project.
+
+    Attributes:
+        title (StringField): Field for the title of the project.
+        description (TextAreaField): Field for the description of the project.
+        url (StringField): Field for the URL of the project.
+        tech_stack (StringField): Field for the tech stack used in the project.
+        project_category (QuerySelectField): Field for the project category.
+        user_id (HiddenField): Field for the user ID the project belongs to.
+    """
+
+    title = StringField("Title", validators=[DataRequired()])
+    description = TextAreaField("Description", validators=[DataRequired()])
+    url = StringField("URL", validators=[DataRequired(), URL()])
+    tech_stack = StringField("Tech Stack", validators=[DataRequired()])
+    project_category = QuerySelectField(
+        "Project Category",
+        query_factory=lambda: ProjectCategory.query.all(),
+        get_label=lambda x: x.name,
+    )
     user_id = HiddenField(
         "User ID", default=lambda: current_user.id if current_user else None
     )
