@@ -363,3 +363,4 @@ $RECYCLE.BIN/
 .idea/
 .gitignore
 .dockerignore
+.codiumai

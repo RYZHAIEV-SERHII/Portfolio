@@ -5,7 +5,7 @@ from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 
 from .db import db
-from .forms import SkillForm, ExperienceForm, ProjectForm
+from .forms import SkillForm, ExperienceForm, ProjectForm, ImageForm
 from .models import (
     User,
     Project,
@@ -216,6 +216,7 @@ class ProjectModelView(ModelView):
         "url": "URL",
         "tech_stack": "Tech Stack",
         "project_category": "Project Category",
+        "images": "Images",
     }
     column_list = (
         "title",
@@ -224,6 +225,7 @@ class ProjectModelView(ModelView):
         "tech_stack",
         "project_category",
         "created_at",
+        "images",
     )
     column_filters = ("title", "description", "url", "tech_stack", "project_category")
     column_editable_list = (
@@ -278,11 +280,93 @@ class ProjectModelView(ModelView):
             return True
 
 
+class ImageView(ModelView):
+    """
+    Admin view for managing images associated with projects.
+
+    Attributes:
+        column_labels (dict): Maps column names to their labels in the list view.
+        column_list (tuple): Columns to display in the list view.
+        column_editable_list (tuple): Columns that can be edited directly in the list view.
+    """
+
+    form = ImageForm
+    column_labels = {
+        "id": "ID",
+        "project.title": "Project",
+        "image_source": "Image Source",
+        "name": "File Name",
+        "url": "URL",
+        "file_data": "File Data",
+    }
+    column_list = ("id", "project.title", "image_source", "name", "url", "file_data")
+    column_editable_list = ("image_source", "project", "name", "url")
+
+    def create_image(self, form: ImageForm) -> bool:
+        """
+        Creates a new image instance from the form data.
+
+        Args:
+            form (ImageForm): The form containing the image data.
+
+        Returns:
+            bool: True if the image was created successfully, False otherwise.
+        """
+        try:
+            image = Image(
+                project_id=form.project.data.id,
+                image_source=form.image_source.data,
+                name=form.get_image_name(),
+                file_data=(
+                    form.file.data.read() if form.image_source.data == "file" else None
+                ),
+                url=form.url.data if form.image_source.data == "url" else None,
+            )
+            db.session.add(image)
+            db.session.commit()
+            flash("Image created successfully.", "success")
+            return True
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error creating image: {e}", "error")
+            return False
+
+    def update_image(self, image: Image, form: ImageForm) -> bool:
+        """
+        Updates an existing image instance from the form data.
+
+        Args:
+            image (Image): The image instance to update.
+            form (ImageForm): The form containing the image data.
+
+        Returns:
+            bool: True if the image was updated successfully, False otherwise.
+        """
+        try:
+            image.project_id = form.project.data.id
+            image.image_source = form.image_source.data
+            image.name = form.get_image_name()
+            if form.image_source.data == "file":
+                image.file_data = form.file.data.read()
+                image.url = None
+            else:
+                image.url = form.url.data
+                image.file_data = None
+
+            db.session.commit()
+            flash("Image updated successfully.", "success")
+            return True
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating image: {e}", "error")
+            return False
+
+
 # Add views for your models
 admin.add_view(AdminModelView(User, db.session))
 admin.add_view(ProjectModelView(Project, db.session))
 admin.add_view(AdminModelView(ProjectCategory, db.session))
-admin.add_view(AdminModelView(Image, db.session))
+admin.add_view(ImageView(Image, db.session))
 admin.add_view(SkillModelView(Skill, db.session))
 admin.add_view(AdminModelView(SkillCategory, db.session))
 admin.add_view(ExperienceModelView(Experience, db.session))

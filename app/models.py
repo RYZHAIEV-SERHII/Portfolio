@@ -100,7 +100,9 @@ class Image(db.Model):
         id (int): Unique identifier for the image.
         project_id (int): Foreign key referencing the Project model.
         name (str): Name of the image.
-        data (bytes): Binary data of the image.
+        image_source (str): Source of the image (file or url).
+        file_data (bytes): Binary data of the image.
+        url (str): URL of the image if it is stored remotely.
         project (Project): The project this image belongs to.
     """
 
@@ -108,8 +110,20 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey("projects.id"), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False)
+    image_source = db.Column(
+        db.String(50), nullable=False, default="file"
+    )  # file or url
+    file_data = db.Column(db.LargeBinary, nullable=True)
+    url = db.Column(db.String(255), nullable=True)
+
     project = db.relationship("Project", back_populates="images")
+
+    def get_image(self):
+        """Return the image data or URL based on the image source."""
+        return self.file_data if self.image_source == "file" else self.url
+
+    def __str__(self):
+        return self.name
 
 
 # Define the Skill model

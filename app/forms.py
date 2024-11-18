@@ -1,5 +1,6 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileAllowed
 from wtforms import (
     StringField,
     PasswordField,
@@ -10,11 +11,12 @@ from wtforms import (
     HiddenField,
     SelectField,
     DateField,
+    FileField,
 )
-from wtforms.validators import DataRequired, Length, URL
+from wtforms.validators import DataRequired, Length, URL, Optional
 from wtforms_sqlalchemy.fields import QuerySelectField
 
-from .models import SkillCategory, ProjectCategory
+from .models import SkillCategory, ProjectCategory, Project
 
 
 class ContactForm(FlaskForm):
@@ -130,7 +132,65 @@ class ProjectForm(FlaskForm):
         "Project Category",
         query_factory=lambda: ProjectCategory.query.all(),
         get_label=lambda x: x.name,
+        validators=[DataRequired()],
     )
     user_id = HiddenField(
         "User ID", default=lambda: current_user.id if current_user else None
     )
+
+
+class ImageForm(FlaskForm):
+    """
+    Form for adding a new image to a project.
+
+    Attributes:
+        image_source (RadioField): Field for selecting the image source.
+        file (FileField): Field for uploading the image file.
+        url (StringField): Field for the image URL.
+        project (SelectField): Field for selecting the project to add the image to.
+    """
+
+    name = StringField("Name")
+    image_source = RadioField(
+        "Image Source",
+        # The choices are: file or url
+        choices=[("file", "File"), ("url", "URL")],
+        default="file",
+        validators=[DataRequired()],
+    )
+
+    file = FileField(
+        "File",
+        validators=[
+            FileAllowed(["jpg", "jpeg", "png", "gif", "svg", "webp"], "Images only!"),
+            Optional(),
+        ],
+    )
+
+    url = StringField(
+        "URL",
+        validators=[
+            URL(),
+            Optional(),
+        ],
+    )
+
+    project = QuerySelectField(
+        "Project",
+        query_factory=lambda: Project.query.all(),
+        get_label=lambda project: project.title,
+        allow_blank=True,
+        validators=[DataRequired()],
+    )
+
+    def get_image_name(self):
+        if self.image_source.data == "file":
+            return self.file.data.filename
+        elif self.image_source.data == "url":
+            return self.url.data.split("/")[-1]
+
+    def __init__(self, *args, **kwargs):
+        super(ImageForm, self).__init__(*args, **kwargs)
+        # Set the name field data based on the image source
+        if self.image_source.data and (self.file.data or self.url.data):
+            self.name.data = self.get_image_name()
