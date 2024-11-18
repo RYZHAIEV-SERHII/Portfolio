@@ -139,3 +139,9 @@ def create_experience():
     db.session.add(experience)
     db.session.commit()
     return "Experience created successfully"
+
+
+@main.route("/images")
+def images():
+    projects = Project.query.all()
+    return render_template("images.html", projects=projects)
