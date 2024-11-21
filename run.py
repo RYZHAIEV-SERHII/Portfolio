@@ -6,6 +6,7 @@ from sqlalchemy.exc import OperationalError
 
 from app import create_app
 from app.db import db
+from cli import cli as run_cli
 
 app = create_app()
 
@@ -37,7 +38,7 @@ def check_database_connection():
 if __name__ == "__main__":
     setup_logging()
     check_database_connection()
-    app.run(host="0.0.0.0", port=5000)
+    run_cli()
 
 
 # Optional features to show my skills.
