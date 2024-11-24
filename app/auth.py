@@ -2,8 +2,9 @@ from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required
 from werkzeug.security import check_password_hash
 
+from app.db import database
+from src.db.models import User
 from .forms import LoginForm
-from .models import User
 
 login_manager = LoginManager()  # Create a LoginManager instance
 
@@ -34,7 +35,7 @@ def login():
     """
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = database.session.query(User).filter_by(email=form.email.data).first()
         if user and check_password_hash(user.password_hash, form.password.data):
             login_user(user)
             return redirect(url_for("main.render_page"))
@@ -66,9 +67,9 @@ def load_user(user_id):
     This function is expected to return an instance of the user class or None if the user does not exist.
 
     Args:
-        user_id (UUID): Unique identifier for the user to load.
+        user_id (int): Unique identifier for the user to load.
 
     Returns:
         User: The loaded user instance or None if no matching user was found.
     """
-    return User.query.get(user_id)
+    return database.session.query(User).get(user_id)

@@ -1,17 +1,15 @@
 import logging.config
 import os
 
-from flask_migrate import Migrate
 from sqlalchemy.exc import OperationalError
 
+from api import create_api
 from app import create_app
-from app.db import db
+from app.db import database
 from cli import cli as run_cli
 
 app = create_app()
-
-# Initialize Flask-Migrate for handling migrations
-migrate = Migrate(app, db)
+api = create_api()
 
 
 # Load logging configuration from logging.conf
@@ -27,7 +25,7 @@ def setup_logging():
 def check_database_connection():
     try:
         with app.app_context():
-            db.engine.connect()
+            database.engine.connect()
             print("Database connected successfully.")
     except OperationalError as e:
         error_message = "Error during connecting to the database."
@@ -39,7 +37,6 @@ if __name__ == "__main__":
     setup_logging()
     check_database_connection()
     run_cli()
-
 
 # Optional features to show my skills.
 # When it comes to deploying:

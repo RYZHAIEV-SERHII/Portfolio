@@ -1,6 +1,7 @@
 alembic==1.13.2
 annotated-types==0.7.0
 anyio==4.4.0
+bcrypt==4.2.0
 black==24.8.0
 blinker==1.8.2
 cfgv==3.4.0
@@ -11,12 +12,13 @@ filelock==3.16.0
 flake8==7.1.1
 Flask==3.0.3
 Flask-Admin==1.6.1
+Flask-Bcrypt==1.0.1
 Flask-Login==0.6.3
 Flask-Mail==0.10.0
-Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.2
 greenlet==3.0.3
+gunicorn==23.0.0
 h11==0.14.0
 identify==2.6.0
 idna==3.8
@@ -47,3 +49,4 @@ uvicorn==0.30.6
 virtualenv==20.26.4
 Werkzeug==3.0.4
 WTForms==3.2.1
+WTForms-SQLAlchemy==0.4.2

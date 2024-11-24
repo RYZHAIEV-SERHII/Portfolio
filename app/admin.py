@@ -4,9 +4,9 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 
-from .db import db
+from .db import database as db
 from .forms import SkillForm, ExperienceForm, ProjectForm, ImageForm
-from .models import (
+from src.db.models import (
     User,
     Project,
     Image,

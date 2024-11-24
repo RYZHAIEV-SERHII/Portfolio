@@ -56,7 +56,7 @@ def run_fast_api() -> None:
             "--log-level",
             "info",
             "--reload",
-            "api:portfolio_api",
+            "run:api",
         ]
     )
     print("FastAPI app is running on http://localhost:8000")
@@ -88,7 +88,7 @@ def stop_fast_api() -> None:
 
     This function stops the FastAPI app.
     """
-    subprocess.run(["pkill", "-f", "gunicorn.*api:portfolio_api"])
+    subprocess.run(["pkill", "-f", "gunicorn.*run:api"])
     print("FastAPI app stopped.")
 
 

@@ -16,7 +16,7 @@ from wtforms import (
 from wtforms.validators import DataRequired, Length, URL, Optional
 from wtforms_sqlalchemy.fields import QuerySelectField
 
-from .models import SkillCategory, ProjectCategory, Project
+from src.db.models import SkillCategory, ProjectCategory, Project
 
 
 class ContactForm(FlaskForm):
