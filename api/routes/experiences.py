@@ -1,7 +1,6 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 # from api.security import check_authorization
@@ -13,7 +12,12 @@ from api.crud.experience import (
     delete_experience,
 )
 from api.db import database
-from api.schemas.experience import ExperienceSchema
+from api.schemas.experience import (
+    ExperienceSchema,
+    UpdateExperienceResponse,
+    CreateExperienceResponse,
+    DeleteExperienceResponse,
+)
 
 # from src.db.models import Experience
 
@@ -39,7 +43,7 @@ async def get_experience(
 
 
 # TODO: add authorization
-@router.post("/experiences", response_model=ExperienceSchema)
+@router.post("/experiences", response_model=CreateExperienceResponse)
 async def create_new_experience(
     experience: ExperienceSchema, db: Session = Depends(database.get_db_session)
 ):
@@ -49,8 +53,7 @@ async def create_new_experience(
 
 
 # TODO: add authorization
-# FIXME: make endpoint work
-@router.put("/experiences/{experience_id}", response_model=ExperienceSchema)
+@router.put("/experiences/{experience_id}", response_model=UpdateExperienceResponse)
 # @check_authorization(Experience, resource_id_attr="id", user_id_attr="user_id")
 async def update_existing_experience(
     experience_id: int,
@@ -65,11 +68,9 @@ async def update_existing_experience(
 
 
 # TODO: add authorization
-# FIXME: make endpoint work
-@router.delete("/experiences/{experience_id}")
+@router.delete("/experiences/{experience_id}", response_model=DeleteExperienceResponse)
 async def delete_existing_experience(
     experience_id: int, db: Session = Depends(database.get_db_session)
 ):
     """Delete an experience"""
-    await delete_experience(experience_id, db)
-    return JSONResponse(content={"message": "Experience deleted"}, status_code=200)
+    return await delete_experience(experience_id, db)
