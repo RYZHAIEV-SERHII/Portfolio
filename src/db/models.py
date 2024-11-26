@@ -9,7 +9,6 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     func,
-    LargeBinary,
 )
 from sqlalchemy.orm import relationship
 
@@ -158,58 +157,93 @@ class ProjectCategory(Base):
 
 
 class Image(Base):
-    """Image model representing an image of a project in the system.
+    """Image model representing an image in the system.
 
     Attributes:
         id (int): Unique identifier for the image.
-        project_id (int): Foreign key referencing the Project model.
         name (str): Name of the image.
-        image_source (str): Source of the image (file or url).
-        file_data (bytes): Binary data of the image.
-        url (str): URL of the image if it is stored remotely.
-        project (Project): The project this image belongs to.
+        url (str): URL of the image.
+        image_category_id (int): Foreign key referencing the image category
+            this image belongs to.
+        project_id (int, optional): Foreign key referencing the project this image
+            belongs to, if any.
+        project (Project): The project this image belongs to, if any.
+        image_category (ImageCategory): The image category this image belongs to.
     """
 
     __tablename__ = "images"
 
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     name = Column(String(100), nullable=False)
-    image_source = Column(String(50), nullable=False, default="file")  # file or url
-    file_data = Column(LargeBinary, nullable=True)
-    url = Column(String(255), nullable=True)
-
+    url = Column(String(255), nullable=False)
+    image_category_id = Column(
+        Integer, ForeignKey("image_categories.id"), nullable=False
+    )
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     project = relationship("Project", back_populates="images")
+    image_category = relationship("ImageCategory", back_populates="images")
 
-    def __init__(self, project_id, name, image_source="file", file_data=None, url=None):
+    def __init__(self, name, url, image_category_id, project_id=None):
         """Initialize an Image instance.
 
         Args:
-            project_id (int): Foreign key referencing the Project model.
             name (str): Name of the image.
-            image_source (str): Source of the image (file or url).
-            file_data (bytes, optional): Binary data of the image.
-            url (str, optional): URL of the image if it is stored remotely.
+            url (str): URL of the image.
+            image_category_id (int): Foreign key referencing the image category
+                this image belongs to.
+            project_id (int, optional): Foreign key referencing the project this image
+                belongs to, if any.
         """
-        self.project_id = project_id
         self.name = name
-        self.image_source = image_source
-        self.file_data = file_data
         self.url = url
+        self.image_category_id = image_category_id
+        self.project_id = project_id
 
-    def get_image(self):
-        """Return the image data or URL based on the image source.
+    def get_image(self) -> str:
+        """Return the URL of the image.
 
         Returns:
-            Union[bytes, str]: The image data if the source is 'file', or the URL if the source is 'url'.
+            str: The URL of the image.
         """
-        return self.file_data if self.image_source == "file" else self.url
+        return self.url
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return the name of the image.
 
         Returns:
             str: The name of the image.
+        """
+        return self.name
+
+
+class ImageCategory(Base):
+    """ImageCategory model representing a category of images in the system.
+
+    Attributes:
+        id (int): Unique identifier for the image category.
+        name (str): Name of the image category.
+        images (list[Image]): The images in this category.
+    """
+
+    __tablename__ = "image_categories"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    images = relationship("Image", back_populates="image_category")
+
+    def __init__(self, name):
+        """Initialize an ImageCategory instance.
+
+        Args:
+            name (str): Name of the image category.
+        """
+        self.name = name
+
+    def __str__(self):
+        """Return the name of the image category.
+
+        Returns:
+            str: The name of the image category.
         """
         return self.name
 

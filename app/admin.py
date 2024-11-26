@@ -4,8 +4,6 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 
-from .db import database as db
-from .forms import SkillForm, ExperienceForm, ProjectForm, ImageForm
 from src.db.models import (
     User,
     Project,
@@ -16,6 +14,8 @@ from src.db.models import (
     SkillCategory,
     ProjectCategory,
 )
+from .db import database as db
+from .forms import SkillForm, ExperienceForm, ProjectForm, ImageForm
 
 # Initialize Flask-Admin
 admin = Admin(name="Admin Panel", template_mode="bootstrap4")
@@ -292,15 +292,13 @@ class ImageView(ModelView):
 
     form = ImageForm
     column_labels = {
-        "id": "ID",
-        "project.title": "Project",
-        "image_source": "Image Source",
-        "name": "File Name",
+        "name": "Name",
         "url": "URL",
-        "file_data": "File Data",
+        "image_category": "Image Category",
+        "project": "Project",
     }
-    column_list = ("id", "project.title", "image_source", "name", "url", "file_data")
-    column_editable_list = ("image_source", "project", "name", "url")
+    column_list = ("name", "url", "image_category", "project")
+    column_editable_list = ("name", "url", "image_category", "project")
 
     def create_image(self, form: ImageForm) -> bool:
         """
@@ -314,13 +312,10 @@ class ImageView(ModelView):
         """
         try:
             image = Image(
-                project_id=form.project.data.id,
-                image_source=form.image_source.data,
                 name=form.get_image_name(),
-                file_data=(
-                    form.file.data.read() if form.image_source.data == "file" else None
-                ),
-                url=form.url.data if form.image_source.data == "url" else None,
+                url=form.url.data,
+                image_category_id=form.image_category.data,
+                project_id=form.project.data,
             )
             db.session.add(image)
             db.session.commit()
@@ -344,14 +339,8 @@ class ImageView(ModelView):
         """
         try:
             image.project_id = form.project.data.id
-            image.image_source = form.image_source.data
             image.name = form.get_image_name()
-            if form.image_source.data == "file":
-                image.file_data = form.file.data.read()
-                image.url = None
-            else:
-                image.url = form.url.data
-                image.file_data = None
+            image.url = form.url.data
 
             db.session.commit()
             flash("Image updated successfully.", "success")

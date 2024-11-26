@@ -1,6 +1,5 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed
 from wtforms import (
     StringField,
     PasswordField,
@@ -11,12 +10,11 @@ from wtforms import (
     HiddenField,
     SelectField,
     DateField,
-    FileField,
 )
-from wtforms.validators import DataRequired, Length, URL, Optional
+from wtforms.validators import DataRequired, Length, URL
 from wtforms_sqlalchemy.fields import QuerySelectField
 
-from src.db.models import SkillCategory, ProjectCategory, Project
+from src.db.models import SkillCategory, ProjectCategory, Project, ImageCategory
 
 
 class ContactForm(FlaskForm):
@@ -141,56 +139,50 @@ class ProjectForm(FlaskForm):
 
 class ImageForm(FlaskForm):
     """
-    Form for adding a new image to a project.
+    Form for adding a new image.
 
     Attributes:
-        image_source (RadioField): Field for selecting the image source.
-        file (FileField): Field for uploading the image file.
-        url (StringField): Field for the image URL.
-        project (SelectField): Field for selecting the project to add the image to.
+        name (StringField): Field for the name of the image.
+        url (StringField): Field for the URL of the image.
+        image_category (QuerySelectField): Field for the image category.
+        project (QuerySelectField): Field for the project this image belongs to.
     """
 
     name = StringField("Name")
-    image_source = RadioField(
-        "Image Source",
-        # The choices are: file or url
-        choices=[("file", "File"), ("url", "URL")],
-        default="file",
-        validators=[DataRequired()],
-    )
-
-    file = FileField(
-        "File",
-        validators=[
-            FileAllowed(["jpg", "jpeg", "png", "gif", "svg", "webp"], "Images only!"),
-            Optional(),
-        ],
-    )
-
     url = StringField(
         "URL",
         validators=[
             URL(),
-            Optional(),
+            DataRequired(),
         ],
     )
-
+    image_category = QuerySelectField(
+        "Image Category",
+        query_factory=lambda: ImageCategory.query.all(),
+        get_label=lambda image_category: image_category.name,
+        allow_blank=True,
+        validators=[DataRequired()],
+    )
     project = QuerySelectField(
         "Project",
         query_factory=lambda: Project.query.all(),
         get_label=lambda project: project.title,
         allow_blank=True,
-        validators=[DataRequired()],
     )
 
     def get_image_name(self):
-        if self.image_source.data == "file":
-            return self.file.data.filename
-        elif self.image_source.data == "url":
-            return self.url.data.split("/")[-1]
+        """
+        If the user has filled in the name field, use that as the image name.
+        Otherwise, use the last part of the URL as the image name.
+        """
+        return self.name.data if self.name.data else self.url.data.split("/")[-1]
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the ImageForm instance.
+
+        By default, the image name is the value of the name field, or the last
+        part of the URL if the name field is empty.
+        """
         super(ImageForm, self).__init__(*args, **kwargs)
-        # Set the name field data based on the image source
-        if self.image_source.data and (self.file.data or self.url.data):
-            self.name.data = self.get_image_name()
+        self.name.data = self.get_image_name()
