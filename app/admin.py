@@ -13,9 +13,16 @@ from src.db.models import (
     ContactMessage,
     SkillCategory,
     ProjectCategory,
+    ImageCategory,
 )
 from .db import database as db
-from .forms import SkillForm, ExperienceForm, ProjectForm, ImageForm
+from .forms import (
+    SkillForm,
+    ExperienceForm,
+    ProjectForm,
+    ImageForm,
+    ImageCategoryForm,
+)
 
 # Initialize Flask-Admin
 admin = Admin(name="Admin Panel", template_mode="bootstrap4")
@@ -351,11 +358,28 @@ class ImageView(ModelView):
             return False
 
 
+class ImageCategoryView(AdminModelView):
+    """
+    Admin view for managing image categories.
+
+    Attributes:
+        column_labels (dict): Maps column names to their labels in the list view.
+        column_list (tuple): Columns to display in the list view.
+        column_editable_list (tuple): Columns that can be edited directly in the list view.
+    """
+
+    form = ImageCategoryForm
+    column_labels = {"name": "Name"}
+    column_list = ("name",)
+    column_editable_list = ("name",)
+
+
 # Add views for your models
 admin.add_view(AdminModelView(User, db.session))
 admin.add_view(ProjectModelView(Project, db.session))
 admin.add_view(AdminModelView(ProjectCategory, db.session))
 admin.add_view(ImageView(Image, db.session))
+admin.add_view(ImageCategoryView(ImageCategory, db.session))
 admin.add_view(SkillModelView(Skill, db.session))
 admin.add_view(AdminModelView(SkillCategory, db.session))
 admin.add_view(ExperienceModelView(Experience, db.session))

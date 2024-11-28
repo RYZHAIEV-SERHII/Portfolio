@@ -13,7 +13,7 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, Length, URL
 from wtforms_sqlalchemy.fields import QuerySelectField
-
+from app.db import database as db
 from src.db.models import SkillCategory, ProjectCategory, Project, ImageCategory
 
 
@@ -66,7 +66,7 @@ class SkillForm(FlaskForm):
     skill_name = StringField("Skill Name", validators=[DataRequired()])
     skill_category = QuerySelectField(
         "Skill Category",
-        query_factory=lambda: SkillCategory.query.all(),
+        query_factory=lambda: db.session.query(SkillCategory).all(),
         get_label=lambda x: x.name,
         validators=[DataRequired()],
     )
@@ -128,7 +128,7 @@ class ProjectForm(FlaskForm):
     tech_stack = StringField("Tech Stack", validators=[DataRequired()])
     project_category = QuerySelectField(
         "Project Category",
-        query_factory=lambda: ProjectCategory.query.all(),
+        query_factory=lambda: db.session.query(ProjectCategory).all(),
         get_label=lambda x: x.name,
         validators=[DataRequired()],
     )
@@ -158,24 +158,35 @@ class ImageForm(FlaskForm):
     )
     image_category = QuerySelectField(
         "Image Category",
-        query_factory=lambda: ImageCategory.query.all(),
+        query_factory=lambda: db.session.query(ImageCategory).all(),
         get_label=lambda image_category: image_category.name,
         allow_blank=True,
         validators=[DataRequired()],
     )
     project = QuerySelectField(
         "Project",
-        query_factory=lambda: Project.query.all(),
+        query_factory=lambda: db.session.query(Project).all(),
         get_label=lambda project: project.title,
         allow_blank=True,
     )
 
     def get_image_name(self):
         """
-        If the user has filled in the name field, use that as the image name.
-        Otherwise, use the last part of the URL as the image name.
+        Retrieve the image name from the form data.
+
+        Returns:
+            str: The name of the image. If the 'name' field is populated, it returns
+            that value. Otherwise, it extracts and returns the last part of the URL
+            if the 'url' field is populated. If neither field is populated, it returns
+            an empty string.
         """
-        return self.name.data if self.name.data else self.url.data.split("/")[-1]
+
+        if self.name.data:
+            return self.name.data
+        elif self.url.data:
+            return self.url.data.split("/")[-1]
+        else:
+            return ""
 
     def __init__(self, *args, **kwargs):
         """
@@ -186,3 +197,14 @@ class ImageForm(FlaskForm):
         """
         super(ImageForm, self).__init__(*args, **kwargs)
         self.name.data = self.get_image_name()
+
+
+class ImageCategoryForm(FlaskForm):
+    """
+    Form for adding a new image category.
+
+    Attributes:
+        name (StringField): Field for the name of the image category.
+    """
+
+    name = StringField("Name", validators=[DataRequired(), Length(min=3, max=128)])

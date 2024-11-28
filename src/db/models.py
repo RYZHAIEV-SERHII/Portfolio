@@ -115,6 +115,29 @@ class Project(Base):
         self.url = url
         self.project_category_id = project_category_id
 
+    def __repr__(self):
+        """Return a string representation of the Project instance.
+
+        Returns:
+            str: A string representing the Project instance.
+        """
+        return (
+            f"Project("
+            f"'title={self.title}, "
+            f"description={self.description}, "
+            f"tech_stack={self.tech_stack}, "
+            f"url={self.url}, "
+            f"project_category_id={self.project_category_id})')"
+        )
+
+    def __str__(self):
+        """Return the title of the project.
+
+        Returns:
+            str: The title of the project.
+        """
+        return self.title
+
 
 class ProjectCategory(Base):
     """ProjectCategory model representing a category of projects in the system.
@@ -177,7 +200,7 @@ class Image(Base):
     name = Column(String(100), nullable=False)
     url = Column(String(255), nullable=False)
     image_category_id = Column(
-        Integer, ForeignKey("image_categories.id"), nullable=False
+        Integer, ForeignKey("image_categories.id"), nullable=True
     )
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     project = relationship("Project", back_populates="images")
@@ -229,7 +252,7 @@ class ImageCategory(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
-    images = relationship("Image", back_populates="image_category")
+    images = relationship("Image", back_populates="image_category", lazy="joined")
 
     def __init__(self, name):
         """Initialize an ImageCategory instance.
