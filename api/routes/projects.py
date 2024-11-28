@@ -1,7 +1,6 @@
 from typing import List
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from api.crud.project import (
@@ -11,8 +10,13 @@ from api.crud.project import (
     update_project,
     delete_project,
 )
-from api.schemas.project import ProjectSchema
 from api.db import database
+from api.schemas.project import (
+    CreateProjectResponse,
+    DeleteProjectResponse,
+    ProjectSchema,
+    UpdateProjectResponse,
+)
 
 router = APIRouter(tags=["Projects"])
 
@@ -34,8 +38,7 @@ async def get_project_details(
 
 
 # TODO: Add authorization
-# FIXME: make endpoint work
-@router.post("/projects", response_model=ProjectSchema)
+@router.post("/projects", response_model=CreateProjectResponse)
 async def create_new_project(
     project: ProjectSchema, db: Session = Depends(database.get_db_session)
 ):
@@ -45,24 +48,22 @@ async def create_new_project(
 
 
 # TODO: Add authorization
-# FIXME: make endpoint work
-@router.put("/projects/{project_id}", response_model=ProjectSchema)
+@router.put("/projects/{project_id}", response_model=UpdateProjectResponse)
 async def update_project_details(
     project_id: int,
     project: ProjectSchema,
     db: Session = Depends(database.get_db_session),
 ):
-    """Update details of an existing project"""
+    """Update an existing project"""
     updated_project = await update_project(project_id, project, db)
     return updated_project
 
 
 # TODO: Add authorization
-# FIXME: make endpoint work
-@router.delete("/projects/{project_id}")
+@router.delete("/projects/{project_id}", response_model=DeleteProjectResponse)
 async def delete_project_by_id(
     project_id: int, db: Session = Depends(database.get_db_session)
 ):
-    """Delete a project by its ID"""
-    await delete_project(project_id, db)
-    return JSONResponse(content={"message": "Project deleted"}, status_code=200)
+    """Delete a project"""
+    deleted_project = await delete_project(project_id, db)
+    return deleted_project
