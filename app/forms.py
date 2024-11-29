@@ -208,3 +208,18 @@ class ImageCategoryForm(FlaskForm):
     """
 
     name = StringField("Name", validators=[DataRequired(), Length(min=3, max=128)])
+
+
+class ResumeForm(FlaskForm):
+    """
+    Form for uploading a resume.
+
+    Attributes:
+        user_id (HiddenField): Field for the user ID the resume belongs to.
+        link (StringField): Field for the URL of the resume.
+    """
+
+    user_id = HiddenField(
+        "User ID", default=lambda: current_user.id if current_user else None
+    )
+    link = StringField("Resume URL", validators=[DataRequired(), URL()])

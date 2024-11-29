@@ -14,6 +14,7 @@ from src.db.models import (
     SkillCategory,
     ProjectCategory,
     ImageCategory,
+    Resume,
 )
 from .db import database as db
 from .forms import (
@@ -22,6 +23,7 @@ from .forms import (
     ProjectForm,
     ImageForm,
     ImageCategoryForm,
+    ResumeForm,
 )
 
 # Initialize Flask-Admin
@@ -374,6 +376,97 @@ class ImageCategoryView(AdminModelView):
     column_editable_list = ("name",)
 
 
+class ResumeModelView(AdminModelView):
+    """
+    Admin view for the Resume model.
+
+    Attributes:
+        form (ResumeForm): The form to use for creating and editing resumes.
+        column_list (tuple): Columns to display in the list view.
+        column_labels (dict): Maps column names to their labels in the list view.
+        column_formatters (dict): Functions to format data in the list view.
+    """
+
+    form = ResumeForm
+    column_list = ("id", "user", "link", "created_at")
+    column_labels = {
+        "id": "ID",
+        "user": "User",
+        "link": "Link",
+        "created_at": "Created At",
+    }
+    column_formatters = {
+        "user": lambda v, c, m, p: m.user.name if m.user else "",
+    }
+
+    def get_query(self):
+        """
+        Override the default query to include a join with the User model.
+
+        Returns:
+            Query: A SQLAlchemy query object.
+        """
+        return self.session.query(self.model).join(User)
+
+    def get_count_query(self):
+        """
+        Override the default count query to include a join with the User model.
+
+        Returns:
+            Query: A SQLAlchemy query object for counting rows.
+        """
+        return self.session.query(db.func.count("*")).select_from(self.model).join(User)
+
+    def create_resume(self, form: ResumeForm) -> bool:
+        """
+        Creates a new resume instance from the form data.
+
+        Args:
+            form (ResumeForm): The form containing the resume data.
+
+        Returns:
+            bool: True if the resume was created successfully, False otherwise.
+        """
+        try:
+            # Create a new resume instance
+            resume = Resume(user_id=current_user.id, link=form.link.data)
+            # Add the resume to the database session
+            db.session.add(resume)
+            # Commit the changes
+            db.session.commit()
+            flash("Resume created successfully.", "success")
+            return True
+        except Exception as e:
+            # Rollback the session and flash an error message if an exception occurs
+            db.session.rollback()
+            flash(f"Error creating resume: {e}", "error")
+            return False
+
+    def update_resume(self, resume: Resume, form: ResumeForm) -> bool:
+        """
+        Updates an existing resume instance from the form data.
+
+        Args:
+            resume (Resume): The resume instance to update.
+            form (ResumeForm): The form containing the resume data.
+
+        Returns:
+            bool: True if the resume was updated successfully, False otherwise.
+        """
+        try:
+            # Update the resume link
+            resume.link = form.link.data
+            # Commit the changes
+            db.session.commit()
+            flash("Resume updated successfully.", "success")
+            return True
+        except Exception as e:
+            # Rollback the session and flash an error message if an exception occurs
+            db.session.rollback()
+            flash(f"Error updating resume: {e}", "error")
+            return False
+
+
 # Add views for your models
 admin.add_view(AdminModelView(User, db.session))
 admin.add_view(ProjectModelView(Project, db.session))
@@ -384,3 +477,4 @@ admin.add_view(SkillModelView(Skill, db.session))
 admin.add_view(AdminModelView(SkillCategory, db.session))
 admin.add_view(ExperienceModelView(Experience, db.session))
 admin.add_view(AdminModelView(ContactMessage, db.session))
+admin.add_view(ResumeModelView(Resume, db.session))
