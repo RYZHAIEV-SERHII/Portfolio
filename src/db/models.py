@@ -420,3 +420,28 @@ class ContactMessage(Base):
             str: A string representing the ContactMessage instance.
         """
         return f"ContactMessage('{self.name}', '{self.email}', '{self.category}')"
+
+
+class Resume(Base):
+    """Resume model representing a resume in the system."""
+
+    __tablename__ = "resume"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    link = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=func.current_timestamp())
+    user = relationship("User", backref="resume", lazy=True)
+
+    def __init__(self, user_id, link):
+        """Initialize a Resume instance.
+
+        Args:
+            user_id (int): Foreign key referencing the User model.
+            link (str): URL of the resume.
+        """
+        self.user_id = user_id
+        self.link = link
+
+    def __str__(self):
+        return self.link
