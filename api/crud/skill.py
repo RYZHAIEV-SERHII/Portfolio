@@ -41,6 +41,23 @@ async def get_skill_by_id(
     return skill
 
 
+async def get_skills_by_category(
+    skill_category_id: int, db: Session = Depends(database.get_db_session)
+):
+    """
+    Retrieve all skills for a specific category.
+
+    Args:
+        skill_category_id (int): The ID of the skill category to filter by.
+        db (Session): The database session.
+
+    Returns:
+        List[Skill]: A list of skills belonging to the specified category.
+    """
+    skills = db.query(Skill).filter_by(skill_category_id=skill_category_id).all()
+    return skills
+
+
 async def create_skill(
     skill: SkillSchema, db: Session = Depends(database.get_db_session)
 ):

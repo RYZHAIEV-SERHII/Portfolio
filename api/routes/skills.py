@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from api.crud.skill import (
     get_all_skills,
     get_skill_by_id,
+    get_skills_by_category,
     create_skill,
     update_skill,
     delete_skill,
@@ -35,6 +36,15 @@ async def get_skill_details(
     """Retrieve details of a specific skill by its ID"""
     skill = await get_skill_by_id(skill_id, db)
     return skill
+
+
+@router.get("/skills/category/{skill_category_id}", response_model=List[SkillSchema])
+async def get_skills_sorted_by_category(
+    skill_category_id: int, db: Session = Depends(database.get_db_session)
+):
+    """Retrieve skills by category ID"""
+    skills = await get_skills_by_category(skill_category_id, db)
+    return skills
 
 
 @router.post("/skills", response_model=CreateSkillResponse)
