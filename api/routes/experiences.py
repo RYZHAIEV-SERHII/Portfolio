@@ -48,7 +48,7 @@ async def create_new_experience(
     experience: ExperienceSchema, db: Session = Depends(database.get_db_session)
 ):
     """Create a new experience"""
-    new_experience = await create_experience(db, experience)
+    new_experience = await create_experience(experience, db)
     return new_experience
 
 

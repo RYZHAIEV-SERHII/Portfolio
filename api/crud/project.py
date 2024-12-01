@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from fastapi.params import Depends
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from api.db import database
 from api.schemas.project import ProjectSchema
@@ -35,7 +35,7 @@ async def get_project_by_id(
         HTTPException: If the project is not found.
     """
     project = db.query(Project).get(project_id)
-    if project is None:
+    if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
 
@@ -54,21 +54,28 @@ async def create_project(
         dict: A dictionary containing the message "Project created successfully" and the created project instance.
 
     """
-    new_project = Project(
-        user_id=project.user_id,
-        title=project.title,
-        description=project.description,
-        tech_stack=project.tech_stack,
-        url=project.url,
-        project_category_id=project.project_category_id,
-    )
-    db.add(new_project)
-    db.commit()
-    db.refresh(new_project)
-    return {
-        "message": "Project created successfully",
-        "created_project": new_project,
-    }
+    try:
+        new_project = Project(
+            user_id=project.user_id,
+            title=project.title,
+            description=project.description,
+            tech_stack=project.tech_stack,
+            url=project.url,
+            project_category_id=project.project_category_id,
+        )
+        db.add(new_project)
+        db.commit()
+        db.refresh(new_project)
+        return {
+            "message": "Project created successfully",
+            "created_project": new_project,
+        }
+    except SQLAlchemyError as e:
+        db.rollback()
+        print(f"SQLAlchemyError occurred: {e}")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while creating the project"
+        )
 
 
 async def update_project(
@@ -88,19 +95,23 @@ async def update_project(
         dict: A dictionary containing the message "Project updated successfully" and the updated project instance.
     """
     try:
-        db_project = db.query(Project).filter(Project.id == project_id).first()
-
-        if db_project is None:
+        project_to_update = await get_project_by_id(project_id, db)
+        if not project_to_update:
             raise HTTPException(status_code=404, detail="Project not found")
 
-        for key, value in project.model_dump(exclude_unset=True).items():
-            setattr(db_project, key, value)
+        # Exclude nested relationships and unset values from the update
+        update_data = project.model_dump(
+            exclude={"project_category", "images"}, exclude_unset=True
+        )
+
+        for key, value in update_data.items():
+            setattr(project_to_update, key, value)
 
         db.commit()
-        db.refresh(db_project)
+        db.refresh(project_to_update)
         return {
             "message": "Project updated successfully",
-            "updated_project": db_project,
+            "updated_project": project_to_update,
         }
     except SQLAlchemyError as e:
         db.rollback()
@@ -124,12 +135,24 @@ async def delete_project(
         dict: A dictionary containing the message "Project deleted successfully" and the deleted project.
             If the project does not exist, the message will be "Project not found" and the deleted_project will be None.
     """
-    db_project = await get_project_by_id(project_id, db)
-    if not db_project:
-        return {"message": "Project not found", "deleted_project": None}
-    db.delete(db_project)
-    db.commit()
-    return {
-        "message": "Project deleted successfully",
-        "deleted_project": db_project,
-    }
+    try:
+        db_project = (
+            db.query(Project)
+            .options(joinedload(Project.project_category))
+            .get(project_id)
+        )
+        if not db_project:
+            return {"message": "Project not found", "deleted_project": None}
+
+        db.delete(db_project)
+        db.commit()
+        return {
+            "message": "Project deleted successfully",
+            "deleted_project": db_project,
+        }
+    except SQLAlchemyError as e:
+        db.rollback()
+        print(f"SQLAlchemyError occurred: {e}")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while deleting the project"
+        )

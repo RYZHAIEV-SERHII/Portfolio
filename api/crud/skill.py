@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from fastapi.params import Depends
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from api.db import database
 from api.schemas.skill import SkillSchema
@@ -35,7 +35,7 @@ async def get_skill_by_id(
     Raises:
         HTTPException: If the skill is not found.
     """
-    skill = db.query(Skill).filter(Skill.id == skill_id).first()
+    skill = db.query(Skill).get(skill_id)
     if not skill:
         raise HTTPException(status_code=404, detail="Skill not found")
     return skill
@@ -58,7 +58,12 @@ async def create_skill(
         HTTPException: If the skill cannot be created.
     """
     try:
-        new_skill = Skill(**skill.model_dump())
+        new_skill = Skill(
+            user_id=skill.user_id,
+            skill_category_id=skill.skill_category_id,
+            skill_name=skill.skill_name,
+            proficiency_level=skill.proficiency_level,
+        )
         db.add(new_skill)
         db.commit()
         db.refresh(new_skill)
@@ -67,7 +72,11 @@ async def create_skill(
             "created_skill": new_skill,
         }
     except SQLAlchemyError as e:
-        raise HTTPException(status_code=400, detail="Error creating skill: " + str(e))
+        db.rollback()
+        print(f"SQLAlchemyError occurred: {e}")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while creating the skill"
+        )
 
 
 async def update_skill(
@@ -87,22 +96,35 @@ async def update_skill(
     Raises:
         HTTPException: If the skill is not found or cannot be updated.
     """
-    skill_to_update = await get_skill_by_id(skill_id, db)
-    if not skill_to_update:
-        raise HTTPException(status_code=404, detail="Skill not found")
+
     try:
-        for key, value in skill.model_dump().items():
+        skill_to_update = await get_skill_by_id(skill_id, db)
+        if not skill_to_update:
+            raise HTTPException(status_code=404, detail="Skill not found")
+
+        # Exclude nested relationships and unset values from the update
+        update_data = skill.model_dump(exclude={"skill_category"}, exclude_unset=True)
+
+        for key, value in update_data.items():
             setattr(skill_to_update, key, value)
+
         db.commit()
+        db.refresh(skill_to_update)
         return {
             "message": "Skill updated successfully",
             "updated_skill": skill_to_update,
         }
     except SQLAlchemyError as e:
-        raise HTTPException(status_code=400, detail="Error updating skill: " + str(e))
+        db.rollback()
+        print(f"SQLAlchemyError occurred: {e}")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while updating the skill"
+        )
 
 
-async def delete_skill(skill_id: int, db: Session = Depends(database.get_db_session)):
+async def delete_skill(
+    skill_id: int, db: Session = Depends(database.get_db_session)
+) -> dict:
     """
     Delete a skill in the database.
 
@@ -116,10 +138,14 @@ async def delete_skill(skill_id: int, db: Session = Depends(database.get_db_sess
     Raises:
         HTTPException: If the skill is not found or cannot be deleted.
     """
-    skill_to_delete = await get_skill_by_id(skill_id, db)
-    if not skill_to_delete:
-        return {"message": "Skill not found", "deleted_skill": None}
+
     try:
+        skill_to_delete = (
+            db.query(Skill).options(joinedload(Skill.skill_category)).get(skill_id)
+        )
+        if not skill_to_delete:
+            return {"message": "Skill not found", "deleted_skill": None}
+
         db.delete(skill_to_delete)
         db.commit()
         return {
@@ -127,4 +153,8 @@ async def delete_skill(skill_id: int, db: Session = Depends(database.get_db_sess
             "deleted_skill": skill_to_delete,
         }
     except SQLAlchemyError as e:
-        raise HTTPException(status_code=400, detail="Error deleting skill: " + str(e))
+        db.rollback()
+        print(f"SQLAlchemyError occurred: {e}")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while deleting the skill"
+        )

@@ -20,7 +20,7 @@ class SkillSchema(BaseModel):
     skill_name: str
     proficiency_level: str
     created_at: Optional[datetime]
-    skill_category: SkillCategorySchema
+    skill_category: Optional[SkillCategorySchema]
 
     class Config:
         from_attributes = True
