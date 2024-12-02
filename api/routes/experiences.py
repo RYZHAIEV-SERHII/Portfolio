@@ -55,7 +55,7 @@ async def create_new_experience(
 # TODO: add authorization
 @router.put("/experiences/{experience_id}", response_model=UpdateExperienceResponse)
 # @check_authorization(Experience, resource_id_attr="id", user_id_attr="user_id")
-async def update_existing_experience(
+async def update_experience_details(
     experience_id: int,
     experience: ExperienceSchema,
     db: Session = Depends(database.get_db_session),
@@ -69,7 +69,7 @@ async def update_existing_experience(
 
 # TODO: add authorization
 @router.delete("/experiences/{experience_id}", response_model=DeleteExperienceResponse)
-async def delete_existing_experience(
+async def delete_experience_by_id(
     experience_id: int, db: Session = Depends(database.get_db_session)
 ):
     """Delete an experience"""

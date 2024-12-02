@@ -29,9 +29,7 @@ async def list_projects(db: Session = Depends(database.get_db_session)):
 
 
 @router.get("/projects/{project_id}", response_model=ProjectSchema)
-async def get_project_details(
-    project_id: int, db: Session = Depends(database.get_db_session)
-):
+async def get_project(project_id: int, db: Session = Depends(database.get_db_session)):
     """Retrieve details of a specific project by its ID"""
     project = await get_project_by_id(project_id, db)
     return project
