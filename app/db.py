@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 
-from src.db import metadata
+from src.db.models import metadata
 
 # Initialize SQLAlchemy
 database = SQLAlchemy(metadata=metadata)

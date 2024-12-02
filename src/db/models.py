@@ -10,9 +10,20 @@ from sqlalchemy import (
     ForeignKey,
     func,
 )
+from sqlalchemy import MetaData
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from src.db import Base
+# ========================== SQLAlchemy Setup ==========================
+
+# Create a MetaData instance to hold table definitions
+metadata = MetaData()
+
+# Define a base class for declarative class definitions
+# This base class maintains a catalog of classes and tables
+Base = declarative_base(metadata=metadata)
+
+# ======================================================================
 
 
 class User(Base, UserMixin):
@@ -423,7 +434,15 @@ class ContactMessage(Base):
 
 
 class Resume(Base):
-    """Resume model representing a resume in the system."""
+    """Resume model representing a resume in the system.
+
+    Attributes:
+        id (int): Unique identifier for the resume.
+        user_id (int): Foreign key referencing the User model.
+        link (str): URL of the resume.
+        created_at (datetime): Timestamp when the resume was created.
+        user (User): The user who owns the resume.
+    """
 
     __tablename__ = "resume"
 
@@ -444,4 +463,79 @@ class Resume(Base):
         self.link = link
 
     def __str__(self):
+        """Return a string representation of the Resume instance."""
         return self.link
+
+
+class Certification(Base):
+    """Certification model representing a certification in the system.
+
+    Attributes:
+        id (int): Unique identifier for the certification.
+        user_id (int): Foreign key referencing the User model.
+        name (str): Name of the certification.
+        issuing_organization (str): Organization that issued the certification.
+        issue_date (date): Date when the certification was issued.
+        credential_id (str): Credential ID of the certification.
+        credential_url (str): URL of the credential.
+        skills_acquired (str): Skills acquired through the certification.
+        user (User): The user who owns the certification.
+    """
+
+    __tablename__ = "certifications"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    name = Column(String(255), nullable=False)
+    issuing_organization = Column(String(255), nullable=False)
+    issue_date = Column(Date, nullable=False)
+    credential_id = Column(String(255), nullable=False)
+    credential_url = Column(String(255), nullable=False)
+    skills_acquired = Column(
+        String(255)
+    )  # Assuming skills are stored as a comma-separated string
+
+    user = relationship("User", backref="certifications", lazy=True)
+
+    def __init__(
+        self,
+        user_id,
+        name,
+        issuing_organization,
+        issue_date,
+        credential_id,
+        credential_url,
+        skills_acquired=None,
+    ):
+        """Initialize a Certification instance.
+
+        Args:
+            user_id (int): Foreign key referencing the User model.
+            name (str): Name of the certification.
+            issuing_organization (str): Organization that issued the certification.
+            issue_date (date): Date when the certification was issued.
+            credential_id (str): ID of the credential.
+            credential_url (str): URL of the credential.
+            skills_acquired (str, optional): Skills acquired, stored as a comma-separated string.
+        """
+        self.user_id = user_id
+        self.name = name
+        self.issuing_organization = issuing_organization
+        self.issue_date = issue_date
+        self.credential_id = credential_id
+        self.credential_url = credential_url
+        self.skills_acquired = skills_acquired
+
+    def __str__(self):
+        """Return a name of the certification."""
+        return self.name
+
+    def __repr__(self):
+        """Return a string representation of the Certification instance."""
+        return (
+            f"Certification(user_id={self.user_id}, name='{self.name}', "
+            f"issuing_organization='{self.issuing_organization}', "
+            f"issue_date='{self.issue_date}', credential_id='{self.credential_id}', "
+            f"credential_url='{self.credential_url}', "
+            f"skills_acquired='{self.skills_acquired}')"
+        )
