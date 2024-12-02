@@ -1,18 +1,19 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import (
-    StringField,
     PasswordField,
     SubmitField,
     TextAreaField,
     RadioField,
     EmailField,
-    HiddenField,
     SelectField,
+    StringField,
     DateField,
+    HiddenField,
 )
-from wtforms.validators import DataRequired, Length, URL
+from wtforms.validators import DataRequired, URL, Length
 from wtforms_sqlalchemy.fields import QuerySelectField
+
 from app.db import database as db
 from src.db.models import SkillCategory, ProjectCategory, Project, ImageCategory
 
@@ -223,3 +224,30 @@ class ResumeForm(FlaskForm):
         "User ID", default=lambda: current_user.id if current_user else None
     )
     link = StringField("Resume URL", validators=[DataRequired(), URL()])
+
+
+class CertificationForm(FlaskForm):
+    """
+    Form for adding a new certification.
+
+    Attributes:
+        name (StringField): Field for the name of the certification.
+        issuing_organization (StringField): Field for the issuing organization.
+        issue_date (DateField): Field for the issue date of the certification.
+        credential_id (StringField): Field for the credential ID.
+        credential_url (StringField): Field for the credential URL.
+        skills_acquired (StringField): Field for the skills acquired.
+        user_id (HiddenField): Field for the user ID the certification belongs to.
+    """
+
+    name = StringField("Certification Name", validators=[DataRequired()])
+    issuing_organization = StringField(
+        "Issuing Organization", validators=[DataRequired()]
+    )
+    issue_date = DateField("Issue Date", validators=[DataRequired()])
+    credential_id = StringField("Credential ID")
+    credential_url = StringField("Credential URL")
+    skills_acquired = StringField("Skills Acquired")
+    user_id = HiddenField(
+        "User ID", default=lambda: current_user.id if current_user else None
+    )

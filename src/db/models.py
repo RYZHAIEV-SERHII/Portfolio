@@ -489,10 +489,11 @@ class Certification(Base):
     name = Column(String(255), nullable=False)
     issuing_organization = Column(String(255), nullable=False)
     issue_date = Column(Date, nullable=False)
-    credential_id = Column(String(255), nullable=False)
-    credential_url = Column(String(255), nullable=False)
+    credential_id = Column(String(255), nullable=True)
+    credential_url = Column(String(255), nullable=True)
     skills_acquired = Column(
-        String(255)
+        String(255),
+        nullable=True,
     )  # Assuming skills are stored as a comma-separated string
 
     user = relationship("User", backref="certifications", lazy=True)

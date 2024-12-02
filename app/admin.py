@@ -15,6 +15,7 @@ from src.db.models import (
     ProjectCategory,
     ImageCategory,
     Resume,
+    Certification,
 )
 from .db import database as db
 from .forms import (
@@ -24,6 +25,7 @@ from .forms import (
     ImageForm,
     ImageCategoryForm,
     ResumeForm,
+    CertificationForm,
 )
 
 # Initialize Flask-Admin
@@ -467,6 +469,65 @@ class ResumeModelView(AdminModelView):
             return False
 
 
+class CertificationModelView(ModelView):
+    """
+    Admin view for the Certification model.
+
+    Attributes:
+        form (CertificationForm): The form to use for creating and editing certifications.
+        column_list (tuple): A tuple of column names to display in the list view.
+        column_filters (tuple): A tuple of column names to filter by in the list view.
+        column_editable_list (tuple): A tuple of column names that can be edited in the list view.
+    """
+
+    form = CertificationForm
+    column_list = (
+        "name",
+        "issuing_organization",
+        "issue_date",
+        "credential_id",
+        "credential_url",
+        "skills_acquired",
+    )
+    column_filters = ("name", "issuing_organization", "issue_date")
+    column_editable_list = (
+        "name",
+        "issuing_organization",
+        "issue_date",
+        "credential_id",
+        "credential_url",
+        "skills_acquired",
+    )
+
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.is_admin
+
+    def create_model(self, form):
+        try:
+            certification = Certification(
+                user_id=current_user.id,
+                name=form.name.data,
+                issuing_organization=form.issuing_organization.data,
+                issue_date=form.issue_date.data,
+                credential_id=form.credential_id.data,
+                credential_url=form.credential_url.data,
+                skills_acquired=form.skills_acquired.data,
+            )
+            db.session.add(certification)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("Error: Certification already exists.", "error")
+            return False
+        except Exception as e:
+            db.session.rollback()
+            flash("Error: {}".format(e), "error")
+            return False
+        else:
+            flash("Certification created successfully.", "success")
+            return True
+
+
 # Add views for your models
 admin.add_view(AdminModelView(User, db.session))
 admin.add_view(ProjectModelView(Project, db.session))
@@ -478,3 +539,4 @@ admin.add_view(AdminModelView(SkillCategory, db.session))
 admin.add_view(ExperienceModelView(Experience, db.session))
 admin.add_view(AdminModelView(ContactMessage, db.session))
 admin.add_view(ResumeModelView(Resume, db.session))
+admin.add_view(CertificationModelView(Certification, db.session))
