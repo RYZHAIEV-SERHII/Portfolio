@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, APIRouter
-from .routes import about, projects, skills, experiences, contact, resume
+from .routes import about, projects, skills, experiences, education, contact, resume
 
 from config import env_config
 
@@ -26,10 +26,10 @@ def create_api():
 
     # Include routers
     api_router.include_router(about.router)
-    api_router.include_router(projects.router)
-    api_router.include_router(skills.router)
+    api_router.include_router(education.router)
     api_router.include_router(experiences.router)
-    # api_router.include_router(education.router)
+    api_router.include_router(skills.router)
+    api_router.include_router(projects.router)
     api_router.include_router(contact.router)
     api_router.include_router(resume.router)
     # api_router.include_router(security.router)
