@@ -54,7 +54,6 @@ async def create_new_experience(
 
 # TODO: add authorization
 @router.put("/experiences/{experience_id}", response_model=UpdateExperienceResponse)
-# @check_authorization(Experience, resource_id_attr="id", user_id_attr="user_id")
 async def update_experience_details(
     experience_id: int,
     experience: ExperienceSchema,

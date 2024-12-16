@@ -41,13 +41,14 @@ async def get_project_by_id(
 
 
 async def create_project(
-    project: ProjectSchema, db: Session = Depends(database.get_db_session)
+    project: ProjectSchema, user_id: int, db: Session = Depends(database.get_db_session)
 ) -> dict:
     """
     Create a new project in the database.
 
     Args:
         project (ProjectSchema): The project data to create.
+        user_id (int): The ID of the user who created the project.
         db (Session): The database session.
 
     Returns:
@@ -56,7 +57,7 @@ async def create_project(
     """
     try:
         new_project = Project(
-            user_id=project.user_id,
+            user_id=user_id,  # Use the current user's ID
             title=project.title,
             description=project.description,
             tech_stack=project.tech_stack,
@@ -81,6 +82,7 @@ async def create_project(
 async def update_project(
     project_id: int,
     project: ProjectSchema,
+    user_id: int,
     db: Session = Depends(database.get_db_session),
 ) -> dict:
     """
@@ -89,6 +91,7 @@ async def update_project(
     Args:
         project_id (int): The ID of the project to update.
         project (ProjectSchema): The updated project data.
+        user_id (int): The ID of the user who is updating the project.
         db (Session): The database session.
 
     Returns:
@@ -98,6 +101,12 @@ async def update_project(
         project_to_update = await get_project_by_id(project_id, db)
         if not project_to_update:
             raise HTTPException(status_code=404, detail="Project not found")
+
+        # Ensure the project belongs to the current user
+        if project_to_update.user_id != user_id:
+            raise HTTPException(
+                status_code=403, detail="Not authorized to update this project"
+            )
 
         # Exclude nested relationships and unset values from the update
         update_data = project.model_dump(
@@ -122,13 +131,14 @@ async def update_project(
 
 
 async def delete_project(
-    project_id: int, db: Session = Depends(database.get_db_session)
+    project_id: int, user_id: int, db: Session = Depends(database.get_db_session)
 ) -> dict:
     """
     Delete a project from the database.
 
     Args:
         project_id (int): The ID of the project to delete.
+        user_id (int): The ID of the user who is deleting the project.
         db (Session): The database session.
 
     Returns:
@@ -143,6 +153,12 @@ async def delete_project(
         )
         if not db_project:
             return {"message": "Project not found", "deleted_project": None}
+
+        # Ensure the project belongs to the current user
+        if db_project.user_id != user_id:
+            raise HTTPException(
+                status_code=403, detail="Not authorized to delete this project"
+            )
 
         db.delete(db_project)
         db.commit()

@@ -17,6 +17,8 @@ from api.schemas.project import (
     ProjectSchema,
     UpdateProjectResponse,
 )
+from api.security import check_authorization, get_current_user
+from src.db.models import Project, User
 
 router = APIRouter(tags=["Projects"])
 
@@ -38,30 +40,37 @@ async def get_project(project_id: int, db: Session = Depends(database.get_db_ses
 # TODO: Add authorization
 @router.post("/projects", response_model=CreateProjectResponse)
 async def create_new_project(
-    project: ProjectSchema, db: Session = Depends(database.get_db_session)
+    project: ProjectSchema,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(database.get_db_session),
 ):
     """Create a new project"""
-    new_project = await create_project(project, db)
+    new_project = await create_project(project, current_user.id, db)
     return new_project
 
 
 # TODO: Add authorization
 @router.put("/projects/{project_id}", response_model=UpdateProjectResponse)
-async def update_project_details(
+@check_authorization(Project)
+async def update_existing_project(
     project_id: int,
     project: ProjectSchema,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(database.get_db_session),
 ):
     """Update an existing project"""
-    updated_project = await update_project(project_id, project, db)
+    updated_project = await update_project(project_id, project, current_user.id, db)
     return updated_project
 
 
 # TODO: Add authorization
 @router.delete("/projects/{project_id}", response_model=DeleteProjectResponse)
-async def delete_project_by_id(
-    project_id: int, db: Session = Depends(database.get_db_session)
+@check_authorization(Project)
+async def delete_existing_project(
+    project_id: int,
+    db: Session = Depends(database.get_db_session),
+    current_user: User = Depends(get_current_user),
 ):
-    """Delete a project"""
-    deleted_project = await delete_project(project_id, db)
-    return deleted_project
+    """Delete an existing project"""
+    await delete_project(project_id, current_user.id, db)
+    return {"detail": "Project deleted successfully"}

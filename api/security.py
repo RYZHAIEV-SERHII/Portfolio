@@ -9,6 +9,7 @@ from jose import jwt
 from jose.exceptions import JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
+from werkzeug.security import check_password_hash
 
 from api.db import database
 from src.db.models import User
@@ -20,7 +21,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 # Initialize the password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["scrypt"], deprecated="auto")
 
 # Define the OAuth2PasswordBearer scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -37,7 +38,7 @@ def verify_password(plain_password, hashed_password):
     Returns:
         bool: True if the password matches the hash, False otherwise.
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    return check_password_hash(hashed_password, plain_password)
 
 
 def get_password_hash(password):
