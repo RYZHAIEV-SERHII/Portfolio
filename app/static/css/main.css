@@ -1046,6 +1046,11 @@ section .container {
   right: 15px;
 }
 
+.project-description {
+    white-space: pre-wrap; /* Preserves whitespace and line breaks */
+}
+
+
 
 /*--------------------------------------------------------------
 # Contact Section

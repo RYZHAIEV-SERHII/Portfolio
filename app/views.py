@@ -1,3 +1,5 @@
+from urllib.parse import unquote
+
 from flask import (
     Blueprint,
     render_template,
@@ -25,9 +27,13 @@ def render_page(page="index"):
     then render the corresponding template.
     """
     try:
-        return render_template(
-            f"{page}.html"
-        )  # If no page is specified, default to "index"
+        if page == "projects":
+            projects = database.session.query(Project).all()
+            return render_template("projects.html", projects=projects)
+        else:
+            return render_template(
+                f"{page}.html"
+            )  # If no page is specified, default to "index"
     except Exception:
         abort(404)  # Return 404 if the template does not exist
 
@@ -38,9 +44,20 @@ def project_detail(project_name):
     Render the project detail page based on project name.
     """
     try:
-        # Check if the template exists before rendering
-        template_path = f"projects/{project_name}.html"
-        return render_template(template_path)
+        # Decode the project name from the URL
+        decoded_project_name = unquote(project_name)
+
+        # Query the project by its title
+        project = (
+            database.session.query(Project)
+            .filter_by(title=decoded_project_name)
+            .first()
+        )
+
+        if not project:
+            abort(404)  # Return a 404 error if the project is not found
+
+        return render_template("projects/project_detail.html", project=project)
     except Exception:
         abort(404)  # Return a 404 error if the template does not exist
 

@@ -1,23 +1,23 @@
 {% extends "projects/base_project_template.html" %}
 
-{% set title_content = " ### Name of the new project ### " %}
-
 {% block title %}
-{{ title_content }}
+{{ project.title }}
 {% endblock %}
 
 {% block project_name %}
-{{ title_content }}
+{{ project.title }}
 {% endblock %}
 
 {% block tech_stack %}
-### Technologies used ###
+{{ project.tech_stack }}
 {% endblock %}
 
 {% block github_url %}
-### Paste Github/Gitlab link here ###
+{{ project.url }}
 {% endblock %}
 
 {% block project_description %}
-### Description of the project ###
+<samp class="project-description">
+{{ project.description }}
+</samp>
 {% endblock %}
