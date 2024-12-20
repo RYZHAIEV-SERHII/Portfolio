@@ -28,7 +28,7 @@
                 <center><h4>{{ project.title }}</h4></center>
                 <div class="portfolio-wrap">
                     {% for image in project.images %}
-                    <img src="{{ url_for('static', filename='img/project/' + image.name) }}" class="img-fluid" alt="">
+                    <img src="{{ image.url }}" class="img-fluid" alt="">
                     {% endfor %}
                     <div class="portfolio-info">
                         <div class="portfolio-links">
