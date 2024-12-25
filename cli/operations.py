@@ -1,5 +1,7 @@
 import subprocess
 
+from logging_setup import app_logger, api_logger
+
 
 def run_flask_app() -> None:
     """
@@ -12,7 +14,9 @@ def run_flask_app() -> None:
     - --log-level info: Sets the logging level to 'info' for detailed output.
     - --reload: Enables automatic reloading of the server on code changes.
     """
-    print("Starting Flask app...")
+    app_logger.info("Starting Flask app...")
+    app_logger.info("App logging enabled.")
+
     subprocess.Popen(
         [
             "gunicorn",
@@ -26,7 +30,7 @@ def run_flask_app() -> None:
             "run:app",
         ]
     )
-    print("Flask app is running on http://localhost:5000")
+    app_logger.info("Flask app is running on http://localhost:5000")
 
 
 def run_fast_api() -> None:
@@ -43,7 +47,9 @@ def run_fast_api() -> None:
     - --log-level info: Sets the logging level to 'info' for detailed output.
     - --reload: Enables automatic reloading of the server on code changes.
     """
-    print("Starting FastAPI app...")
+    api_logger.info("Starting FastAPI app...")
+    api_logger.info("API logging enabled.")
+
     subprocess.Popen(
         [
             "gunicorn",
@@ -59,7 +65,7 @@ def run_fast_api() -> None:
             "run:api",
         ]
     )
-    print("FastAPI app is running on http://localhost:8000")
+    api_logger.info("FastAPI app is running on http://localhost:8000")
 
 
 def run_all() -> None:
@@ -79,7 +85,7 @@ def stop_flask_app() -> None:
     This function stops the Flask app.
     """
     subprocess.run(["pkill", "-f", "gunicorn.*run:app"])
-    print("Flask app stopped.")
+    app_logger.info("Flask app stopped.")
 
 
 def stop_fast_api() -> None:
@@ -89,7 +95,7 @@ def stop_fast_api() -> None:
     This function stops the FastAPI app.
     """
     subprocess.run(["pkill", "-f", "gunicorn.*run:api"])
-    print("FastAPI app stopped.")
+    api_logger.info("FastAPI app stopped.")
 
 
 def stop_all() -> None:

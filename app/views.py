@@ -10,6 +10,7 @@ from flask import (
     url_for,
 )
 
+from logging_setup import app_logger
 from src.db.models import ContactMessage, Project
 from .db import database
 from .forms import ContactForm
@@ -34,7 +35,9 @@ def render_page(page="index"):
             return render_template(
                 f"{page}.html"
             )  # If no page is specified, default to "index"
-    except Exception:
+    except Exception as e:
+        app_logger.error("Template does not exist")
+        app_logger.error(f"Details: {str(e)}")
         abort(404)  # Return 404 if the template does not exist
 
 
@@ -55,10 +58,14 @@ def project_detail(project_name):
         )
 
         if not project:
+            app_logger.error("Project not found")
+            app_logger.error(f"Details: {project_name}")
             abort(404)  # Return a 404 error if the project is not found
 
         return render_template("projects/project_detail.html", project=project)
-    except Exception:
+    except Exception as e:
+        app_logger.error("Error rendering project detail page")
+        app_logger.error(f"Details: {str(e)}")
         abort(404)  # Return a 404 error if the template does not exist
 
 
@@ -67,6 +74,7 @@ def resume():
     """
     Redirect to resume link.
     """
+    app_logger.info("Redirecting to resume link")
     return redirect(
         "https://drive.google.com/file/d/1fuxAUUEq0fLgF8xMh4a1IiMAl22fzEud/view?usp=drive_link"
     )
@@ -90,11 +98,6 @@ def contact():
         database.session.commit()
         send_email_notification(name, email, category, message)
         flash("Form submitted successfully", "success")
+        app_logger.info("Contact form submitted successfully")
         return redirect(url_for("main.render_page"))
     return render_template("contact.html", form=form)
-
-
-@main.route("/images")
-def images():
-    projects = database.session.query(Project).query.all()
-    return render_template("images.html", projects=projects)

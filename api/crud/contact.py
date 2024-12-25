@@ -1,7 +1,15 @@
 from api.schemas.contact import ContactInfoResponse, SocialProfile
+from logging_setup import api_logger
 
 
 async def get_contact_info():
+    """
+    Retrieve the contact information.
+
+    Returns:
+        ContactInfoResponse: The contact information.
+    """
+    api_logger.info("Contact info. Status: retrieved")
     return ContactInfoResponse(
         address="Ukraine, Vinnytsia",
         social_profiles=[

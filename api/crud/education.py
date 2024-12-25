@@ -1,4 +1,5 @@
 from datetime import date
+
 from fastapi import Depends, HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -11,10 +12,18 @@ from api.schemas.education import (
     UpdateCertificationResponse,
     DeleteCertificationResponse,
 )
+from logging_setup import api_logger
 from src.db.models import Certification
 
 
 async def get_education_info():
+    """
+    Get education information.
+
+    Returns:
+        EducationInfoResponse: The education information.
+    """
+    api_logger.info("Education info. Status: retrieved")
     return EducationInfoResponse(
         institution_name="CyberBionic Systematics",
         degree="Python Developer",
@@ -39,6 +48,7 @@ async def get_education_info():
 
 async def get_all_certifications(db: Session = Depends(database.get_db_session)):
     """Retrieve all certifications from the database."""
+    api_logger.info("Certifications. Status: retrieved")
     return db.query(Certification).all()
 
 
@@ -48,7 +58,9 @@ async def get_certification_by_id(
     """Retrieve a certification by ID."""
     certification = db.query(Certification).get(certification_id)
     if not certification:
+        api_logger.error(f"Certification {certification_id} not found")
         raise HTTPException(status_code=404, detail="Certification not found")
+    api_logger.info(f"Certification {certification.name} retrieved")
     return certification
 
 
@@ -72,13 +84,14 @@ async def create_certification(
         db.add(new_certification)
         db.commit()
         db.refresh(new_certification)
+        api_logger.info(f"Certification {new_certification.name} created")
         return CreateCertificationResponse(
             message="Certification created successfully",
             created_certification=new_certification,
         )
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while creating the certification"
         )
@@ -93,6 +106,7 @@ async def update_certification(
     try:
         certification_to_update = await get_certification_by_id(certification_id, db)
         if not certification_to_update:
+            api_logger.error(f"Certification {certification_id} not found")
             raise HTTPException(status_code=404, detail="Certification not found")
 
         for key, value in certification.model_dump(exclude_unset=True).items():
@@ -102,13 +116,14 @@ async def update_certification(
 
         db.commit()
         db.refresh(certification_to_update)
+        api_logger.info(f"Certification {certification_to_update.name} updated")
         return UpdateCertificationResponse(
             message="Certification updated successfully",
             updated_certification=certification_to_update,
         )
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while updating the certification"
         )
@@ -121,19 +136,21 @@ async def delete_certification(
     try:
         certification_to_delete = await get_certification_by_id(certification_id, db)
         if not certification_to_delete:
+            api_logger.error(f"Certification {certification_id} not found")
             return DeleteCertificationResponse(
                 message="Certification not found", deleted_certification=None
             )
 
         db.delete(certification_to_delete)
         db.commit()
+        api_logger.info(f"Certification {certification_to_delete.name} deleted")
         return DeleteCertificationResponse(
             message="Certification deleted successfully",
             deleted_certification=certification_to_delete,
         )
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while deleting the certification"
         )

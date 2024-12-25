@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from api.db import database
 from api.schemas.skill import SkillSchema
+from logging_setup import api_logger
 from src.db.models import Skill
 
 
@@ -16,6 +17,7 @@ async def get_all_skills(db: Session = Depends(database.get_db_session)):
         List[Skill]: A list of all skills stored in the database.
     """
     skills = db.query(Skill).all()
+    api_logger.info("Skills. Status: retrieved")
     return skills
 
 
@@ -37,7 +39,9 @@ async def get_skill_by_id(
     """
     skill = db.query(Skill).get(skill_id)
     if not skill:
+        api_logger.error(f"Skill {skill_id} not found")
         raise HTTPException(status_code=404, detail="Skill not found")
+    api_logger.info(f"Skill {skill.skill_name} retrieved")
     return skill
 
 
@@ -55,6 +59,7 @@ async def get_skills_by_category(
         List[Skill]: A list of skills belonging to the specified category.
     """
     skills = db.query(Skill).filter_by(skill_category_id=skill_category_id).all()
+    api_logger.info(f"Skills in category {skill_category_id}. Status: retrieved")
     return skills
 
 
@@ -84,13 +89,14 @@ async def create_skill(
         db.add(new_skill)
         db.commit()
         db.refresh(new_skill)
+        api_logger.info(f"Skill {new_skill.skill_name} created")
         return {
             "message": "Skill created successfully",
             "created_skill": new_skill,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while creating the skill"
         )
@@ -117,6 +123,7 @@ async def update_skill(
     try:
         skill_to_update = await get_skill_by_id(skill_id, db)
         if not skill_to_update:
+            api_logger.error(f"Skill {skill_id} not found")
             raise HTTPException(status_code=404, detail="Skill not found")
 
         # Exclude nested relationships and unset values from the update
@@ -127,13 +134,14 @@ async def update_skill(
 
         db.commit()
         db.refresh(skill_to_update)
+        api_logger.info(f"Skill {skill_to_update.skill_name} updated")
         return {
             "message": "Skill updated successfully",
             "updated_skill": skill_to_update,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while updating the skill"
         )
@@ -161,17 +169,19 @@ async def delete_skill(
             db.query(Skill).options(joinedload(Skill.skill_category)).get(skill_id)
         )
         if not skill_to_delete:
+            api_logger.error(f"Skill {skill_id} not found")
             return {"message": "Skill not found", "deleted_skill": None}
 
         db.delete(skill_to_delete)
         db.commit()
+        api_logger.info(f"Skill {skill_to_delete.skill_name} deleted")
         return {
             "message": "Skill deleted successfully",
             "deleted_skill": skill_to_delete,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while deleting the skill"
         )

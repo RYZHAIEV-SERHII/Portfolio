@@ -1,24 +1,14 @@
-import logging.config
-import os
-
 from sqlalchemy.exc import OperationalError
 
 from api import create_api
 from app import create_app
 from app.db import database
 from cli import cli as run_cli
+from logging_setup import app_logger
+from logging_setup import setup_logging
 
 app = create_app()
 api = create_api()
-
-
-# Load logging configuration from logging.conf
-def setup_logging():
-    # Ensure the 'logs/' directory exists
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
-    logging.config.fileConfig("logging.conf")
-    print("Logging enabled.")
 
 
 # Function to check if the database connection is successful
@@ -26,11 +16,11 @@ def check_database_connection():
     try:
         with app.app_context():
             database.engine.connect()
-            print("Database connected successfully.")
+            app_logger.info("Database connected successfully.")
     except OperationalError as e:
         error_message = "Error during connecting to the database."
-        print(error_message)
-        print(f"Details: {str(e)}")
+        app_logger.error(error_message)
+        app_logger.error(f"Details: {str(e)}")
 
 
 if __name__ == "__main__":

@@ -2,10 +2,10 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask
-from .auth import init_login_manager
 
 from config import env_config
 from .admin import init_admin  # Import init_admin function
+from .auth import init_login_manager
 from .db import init_db  # Import init_db function
 from .mail import init_mail  # Import init_mail function
 

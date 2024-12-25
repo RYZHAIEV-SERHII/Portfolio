@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from werkzeug.security import check_password_hash
 
 from api.db import database
+from logging_setup import api_logger
 from src.db.models import User
 
 load_dotenv()
@@ -101,6 +102,7 @@ def check_authorization(
             # Retrieve the resource from the database
             resource_id = kwargs.get("id")
             if resource_id is None:
+                api_logger.error("Resource ID not provided")
                 raise HTTPException(status_code=400, detail="Resource ID not provided")
 
             resource = (
@@ -111,16 +113,19 @@ def check_authorization(
 
             # Check if the user is authenticated
             if not current_user or not current_user.id:
+                api_logger.error("User not authenticated")
                 raise HTTPException(status_code=401, detail="Invalid user credentials")
 
             # Check if the resource exists
             if not resource:
+                api_logger.error(f"{resource_model.__name__} not found")
                 raise HTTPException(
                     status_code=404, detail=f"{resource_model.__name__} not found"
                 )
 
             # Check if the current user is authorized
             if resource.user_id != current_user.id:
+                api_logger.error(unauthorized_message)
                 raise HTTPException(status_code=403, detail=unauthorized_message)
 
             return await func(*args, **kwargs)
@@ -158,14 +163,17 @@ async def get_current_user(
         # Extract user ID from the token payload
         user_id: str = payload.get("sub")
         if user_id is None:
+            api_logger.error("Invalid token payload")
             raise credentials_exception
     except JWTError:
+        api_logger.error("Invalid token")
         # Raise an exception if there's an error decoding the token
         raise credentials_exception
 
     # Query the database to find the user by ID
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
+        api_logger.error("User not found")
         # Raise an exception if the user does not exist
         raise credentials_exception
 
@@ -184,4 +192,5 @@ def create_access_token(data: dict) -> str:
         str: The encoded JWT token.
     """
     token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+    api_logger.info("Access token created")
     return token

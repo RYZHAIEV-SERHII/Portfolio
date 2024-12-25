@@ -3,6 +3,7 @@ from fastapi.params import Depends
 from sqlalchemy.orm import Session
 
 from api.db import database
+from logging_setup import api_logger
 from src.db.models import Resume
 
 
@@ -21,7 +22,9 @@ async def get_resume_link(db: Session = Depends(database.get_db_session)) -> Res
     """
     resume = db.query(Resume).first()
     if not resume:
+        api_logger.error("Resume not found")
         raise HTTPException(status_code=404, detail="Resume not found")
+    api_logger.info("Resume retrieved")
     return resume
 
 
@@ -43,9 +46,11 @@ async def update_resume_link(
     """
     resume = db.query(Resume).first()
     if not resume:
+        api_logger.error("Resume not found")
         raise HTTPException(status_code=404, detail="Resume not found")
     resume.link = link
     db.commit()
     db.refresh(resume)
+    api_logger.info("Resume updated")
 
     return resume

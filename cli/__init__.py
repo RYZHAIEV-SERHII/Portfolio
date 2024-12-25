@@ -19,19 +19,18 @@ Example:
 
 from cli.setup import parse_arguments, run_setup
 
+from logging_setup import cli_logger
+
 
 def cli() -> None:
     """
     Run the command-line interface for managing app setups.
 
     This function parses command-line arguments to determine which setup to run.
-
-    Prints information about the setup to run and the command-line arguments
-    used.
     """
-    print("Starting CLI...")
+    cli_logger.info("Starting CLI...")
     args = parse_arguments()
-    print(f"Running setup: {args.command} {args.service}")
+    cli_logger.info(f"Running setup: {args.command} {args.service}")
     run_setup(args.command, args.service)
 
 

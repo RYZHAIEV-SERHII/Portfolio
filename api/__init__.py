@@ -1,6 +1,9 @@
 import os
+
 from dotenv import load_dotenv
 from fastapi import FastAPI, APIRouter
+
+from config import env_config
 from .routes import (
     about,
     projects,
@@ -11,8 +14,6 @@ from .routes import (
     resume,
     security,
 )
-
-from config import env_config
 
 load_dotenv()
 

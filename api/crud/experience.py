@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from api.db import database
 from api.schemas.experience import ExperienceSchema
+from logging_setup import api_logger
 from src.db.models import Experience
 
 
@@ -12,6 +13,7 @@ def get_all_experiences(db: Session = Depends(database.get_db_session)):
     """
     Retrieve all experiences from the database.
     """
+    api_logger.info("Experiences. Status: retrieved")
     return db.query(Experience).all()
 
 
@@ -21,7 +23,9 @@ async def get_experience_by_id(
     """Retrieve an experience by ID"""
     experience = db.query(Experience).get(experience_id)
     if not experience:
+        api_logger.error(f"Experience {experience_id} not found")
         raise HTTPException(status_code=404, detail="Experience not found")
+    api_logger.info(f"Experience {experience.company_name} retrieved")
     return experience
 
 
@@ -49,13 +53,14 @@ async def create_experience(
         db.add(new_experience)
         db.commit()
         db.refresh(new_experience)
+        api_logger.info(f"Experience {new_experience.company_name} created")
         return {
             "message": "Experience created successfully",
             "created_experience": new_experience,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while creating the experience"
         )
@@ -79,6 +84,7 @@ async def update_experience(
     try:
         experience_to_update = await get_experience_by_id(experience_id, db)
         if not experience_to_update:
+            api_logger.error(f"Experience {experience_id} not found")
             raise HTTPException(status_code=404, detail="Experience not found")
 
         for key, value in experience.model_dump(exclude_unset=True).items():
@@ -86,13 +92,14 @@ async def update_experience(
 
         db.commit()
         db.refresh(experience_to_update)
+        api_logger.info(f"Experience {experience_to_update.company_name} updated")
         return {
             "message": "Experience updated successfully",
             "updated_experience": experience_to_update,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while updating the experience"
         )
@@ -114,17 +121,19 @@ async def delete_experience(
     try:
         experience_to_delete = await get_experience_by_id(experience_id, db)
         if not experience_to_delete:
+            api_logger.error(f"Experience {experience_id} not found")
             return {"message": "Experience not found", "deleted_experience": None}
 
         db.delete(experience_to_delete)
         db.commit()
+        api_logger.info(f"Experience {experience_to_delete.company_name} deleted")
         return {
             "message": "Experience deleted successfully",
             "deleted_experience": experience_to_delete,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while deleting the experience"
         )

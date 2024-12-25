@@ -2,6 +2,7 @@ import argparse
 import os
 from typing import Optional, Callable, Dict
 
+from logging_setup import cli_logger
 from .operations import (
     run_flask_app,
     run_fast_api,
@@ -42,7 +43,7 @@ def run_setup(command: str, service: str) -> None:
     if setup_function:
         setup_function()
     else:
-        print(f"Unknown command or service: {command} {service}")
+        cli_logger.warning(f"Unknown command or service: {command} {service}")
 
 
 def parse_arguments() -> argparse.Namespace:

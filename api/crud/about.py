@@ -1,5 +1,7 @@
 from api.schemas.about import AboutInfoResponse, AboutInterestsResponse
 
+from logging_setup import api_logger
+
 
 async def get_about_info() -> AboutInfoResponse:
     """
@@ -25,6 +27,7 @@ async def get_about_info() -> AboutInfoResponse:
     enthusiast, I’m eager to connect and build something amazing together. Let’s turn ideas into reality!
     Happy coding! 🖥️
 """
+    api_logger.info("About me info. Status: retrieved")
     return AboutInfoResponse(info=about_info)
 
 
@@ -35,6 +38,7 @@ async def get_all_interests() -> AboutInterestsResponse:
     Returns:
         AboutInterestsResponse: The list of interests.
     """
+    api_logger.info("Interests. Status: retrieved")
     return AboutInterestsResponse(
         interests=[
             "Python",

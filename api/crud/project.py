@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from api.db import database
 from api.schemas.project import ProjectSchema
+from logging_setup import api_logger
 from src.db.models import Project
 
 
@@ -15,6 +16,7 @@ async def get_all_projects(db: Session):
     Returns:
         list: A list of all projects.
     """
+    api_logger.info("Projects. Status: retrieved")
     return db.query(Project).all()
 
 
@@ -36,7 +38,9 @@ async def get_project_by_id(
     """
     project = db.query(Project).get(project_id)
     if not project:
+        api_logger.error(f"Project {project_id} not found")
         raise HTTPException(status_code=404, detail="Project not found")
+    api_logger.info(f"Project {project.title} retrieved")
     return project
 
 
@@ -67,13 +71,14 @@ async def create_project(
         db.add(new_project)
         db.commit()
         db.refresh(new_project)
+        api_logger.info(f"Project {new_project.title} created")
         return {
             "message": "Project created successfully",
             "created_project": new_project,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while creating the project"
         )
@@ -100,10 +105,12 @@ async def update_project(
     try:
         project_to_update = await get_project_by_id(project_id, db)
         if not project_to_update:
+            api_logger.error(f"Project {project_id} not found")
             raise HTTPException(status_code=404, detail="Project not found")
 
         # Ensure the project belongs to the current user
         if project_to_update.user_id != user_id:
+            api_logger.error("Not authorized to update this project")
             raise HTTPException(
                 status_code=403, detail="Not authorized to update this project"
             )
@@ -118,13 +125,14 @@ async def update_project(
 
         db.commit()
         db.refresh(project_to_update)
+        api_logger.info(f"Project {project_to_update.title} updated")
         return {
             "message": "Project updated successfully",
             "updated_project": project_to_update,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while updating the project"
         )
@@ -152,23 +160,26 @@ async def delete_project(
             .get(project_id)
         )
         if not db_project:
+            api_logger.error(f"Project {project_id} not found")
             return {"message": "Project not found", "deleted_project": None}
 
         # Ensure the project belongs to the current user
         if db_project.user_id != user_id:
+            api_logger.error("Not authorized to delete this project")
             raise HTTPException(
                 status_code=403, detail="Not authorized to delete this project"
             )
 
         db.delete(db_project)
         db.commit()
+        api_logger.info(f"Project {db_project.title} deleted")
         return {
             "message": "Project deleted successfully",
             "deleted_project": db_project,
         }
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"SQLAlchemyError occurred: {e}")
+        api_logger.error(f"SQLAlchemyError occurred: {e}")
         raise HTTPException(
             status_code=500, detail="An error occurred while deleting the project"
         )
