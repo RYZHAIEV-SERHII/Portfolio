@@ -1,0 +1,63 @@
+services:
+  flask_app:
+    build:
+      context: .
+      dockerfile: Dockerfile_Flask
+    container_name: portfolio_flask_app
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  fastapi_app:
+    build:
+      context: .
+      dockerfile: Dockerfile_FastAPI
+    container_name: portfolio_fastapi_app
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres
+    container_name: portfolio_db
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db_data:${PGDATA}
+    ports:
+      - ${POSTGRES_PORT_HOST}:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: portfolio_pgadmin
+    restart: always
+    profiles:
+      - "dev"
+    env_file:
+      - .env
+    ports:
+      - ${PGADMIN_PORT_HOST}:80
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  db_data:
+  pgadmin_data:

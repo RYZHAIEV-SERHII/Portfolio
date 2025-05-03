@@ -1,0 +1,62 @@
+# Dockerfile Best Practices - https://github.com/dnaprawa/dockerfile-best-practices
+
+# This line sets the base image to Python 3.13.
+# This means your container will have Python 3.13 installed by default.
+FROM python:3.13-slim AS base
+
+# This adds metadata to the image, specifying the maintainer’s name and email.
+LABEL maintainer="Ryzhaiev Serhii <rsp89.we@gmail.com>"
+
+# By default, all operations are performed with root rights. This is not a good practice.
+# More details - here https://habr.com/ru/post/448480/
+# The next six lines are required to create a non-root user
+# Details about ARG ENV - https://vsupalov.com/docker-arg-env-variable-guide/
+
+ARG UID=10000
+ARG GID=10001
+ENV UID=${UID}
+ENV GID=${GID}
+
+# Install PostgreSQL client libraries and other dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libpq-dev gcc python3-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Gunicorn and Uvicorn globally as root
+RUN pip install --no-cache-dir gunicorn uvicorn
+
+# Create a new group named 'docker_group' with the specified GID
+RUN groupadd -g $GID docker_group && \
+    # Create a new user named 'docker_user' with the specified UID and add it to 'docker_group'
+    useradd -m -u $UID -g docker_group docker_user && \
+    # Change the ownership of the /home/docker_user directory to 'docker_user:docker_group'
+    chown -R docker_user:docker_group /home/docker_user
+
+# This switches to the newly created non-root user for subsequent instructions, enhancing security.
+USER docker_user:docker_group
+
+# This sets the working directory inside the container to /home/docker_user/api.
+WORKDIR /home/docker_user/api
+
+# PYTHONDONTWRITEBYTECODE=1: Prevents Python from writing .pyc files.
+# PYTHONUNBUFFERED=1: Ensures that Python output is sent straight to the terminal (unbuffered).
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+
+# Copies the requirements.txt file to the working directory.
+COPY requirements.txt ./
+
+# Installs the Python dependencies listed in requirements.txt.
+# Make sure psycopg is installed with binary dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# This copies all files from the current directory on the host to the working directory in the container.
+COPY . .
+
+# Expose ports for FastAPI
+EXPOSE 8000
+
+# This specifies the command to run when the container starts.
+# Command to run the FastAPI app directly with Gunicorn and Uvicorn worker
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "1", "-b", "0.0.0.0:8000", "--log-level", "info", "run:api"]
