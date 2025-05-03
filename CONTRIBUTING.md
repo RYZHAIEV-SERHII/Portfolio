@@ -18,23 +18,27 @@ Your help is greatly appreciated. Below are some guidelines to help you get star
    repository in your GitHub account.
 
 2. **Clone your fork**: Clone your forked repository to your local machine.
+
     ```bash
     git clone https://github.com/your-username/Portfolio.git
     cd Portfolio
     ```
 
 3. **Create a branch**: Create a new branch for your changes.
+
     ```bash
    git checkout -b feature/your-feature-name
     ```
 
 4. **Commit your changes**: Commit your changes with a descriptive commit message.
+
     ```bash
     git add .
     git commit -m "Add feature: your feature description"
     ```
 
 5. **Push to your fork**: Push your changes to your forked repository.
+
     ```bash
     git push origin feature/your-feature-name
     ```
@@ -57,9 +61,9 @@ number in the description.
 
 ## Coding Standards
 
-* Follow the PEP 8 coding style guide.
-* Write clear and concise commit messages.
-* Ensure your code is well-documented.
+- Follow the PEP 8 coding style guide.
+- Write clear and concise commit messages.
+- Ensure your code is well-documented.
 
 ## Testing
 

@@ -60,26 +60,26 @@ integrations.
 
 2. Set up the environment variables:
 
-- Create a `.env` file in the root directory of the project.
-- Add the necessary environment variables as shown in the `.env.example` file.
+    - Create a `.env` file in the root directory of the project.
+    - Add the necessary environment variables as shown in the `.env.example` file.
 
 3. (Option 1) Install Python dependencies manually:
 
     ```bash
-      pip install -r requirements.txt
-      ```
-
-- Start the Flask server:
-
-    ```bash
-    flask run
+    pip install -r requirements.txt
     ```
 
-- Start the FastAPI server:
+    - Start the Flask server:
 
-    ```bash
-    uvicorn api:app --reload
-    ```
+        ```bash
+        flask run
+        ```
+
+    - Start the FastAPI server:
+
+        ```bash
+        uvicorn api:app --reload
+        ```
 
 4. (Option 2) Start the app using Docker:
 
