@@ -1,0 +1,290 @@
+[project]
+name = "portfolio-app"
+version = "0.1.0"
+description = "This is my personal portfolio website built using Python, Flask, FastAPI, SQLAlchemy, and PostgreSQL. The site showcases my projects, experience, and skills, while also serving as a backend API for future integrations."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Ryzhaiev Serhii", email = "rsp89.we@gmail.com" },
+]
+
+# Main project dependencies
+dependencies = [
+    "alembic==1.14.0",             # Database migration system
+    "sqlalchemy==2.0.36",          # ORM for database operations
+    "psycopg==3.2.3",              # PostgreSQL driver
+    "python-dotenv==1.0.1",        # Environment variables loader
+    "pydantic==2.10.3",            # Data validation and serialization
+    "pydantic-core==2.27.1",       # Core components of Pydantic
+    "pyyaml==6.0.2",               # YAML file parser
+    "redis==5.2.0",                # Redis client
+    "six==1.17.0",                 # Python 2 and 3 compatibility utilities
+    "python-jose==3.3.0",          # JWT token tools
+    "python-multipart==0.0.19",    # multipart/form-data request handling
+    "bcrypt==4.2.1",               # Password hashing
+    "passlib==1.7.4",              # Password handling library
+    "gunicorn==23.0.0",            # WSGI HTTP server
+]
+
+[project.optional-dependencies]
+# Dependencies for Flask web framework
+flask = [
+    "flask==3.1.0",                # Flask web framework
+    "jinja2==3.1.4",               # Template engine
+    "werkzeug==3.1.3",             # WSGI utilities and HTTP tools
+    "itsdangerous==2.2.0",         # Data signing for security
+    "blinker==1.9.0",              # Signal and event system
+    "click==8.1.7",                # CLI interface utilities
+    "markupsafe==3.0.2",           # Safe HTML rendering
+    "flask-sqlalchemy==3.1.1",     # SQLAlchemy integration with Flask
+    "flask-admin==1.6.1",          # Admin panel for Flask
+    "flask-bcrypt==1.0.1",         # bcrypt integration with Flask
+    "flask-login==0.6.3",          # User session management
+    "flask-mail==0.10.0",          # Email sending with Flask
+    "flask-wtf==1.2.2",            # WTForms integration with Flask
+    "wtforms==3.2.1",              # Form handling
+    "wtforms-sqlalchemy==0.4.2",   # WTForms integration with SQLAlchemy
+]
+
+# Dependencies for FastAPI framework
+fastapi = [
+    "fastapi==0.115.6",            # High-performance API framework
+    "starlette==0.41.3",           # ASGI framework (FastAPI foundation)
+    "uvicorn==0.32.1",             # ASGI server for asynchronous applications
+    "anyio==4.7.0",                # Asynchronous I/O library
+    "h11==0.14.0",                 # HTTP/1.1 protocol
+    "sniffio==1.3.1",              # Detect current async library
+    "idna==3.10",                  # International Domain Names handling
+    "typing-extensions==4.12.2",   # Extensions for Python's typing system
+]
+
+# Development tools and static code analysis
+dev = [
+    "pathspec==0.12.1",                 # File path pattern handling
+    "ruff>=0.11.0",                     # Fast Python linter and formatter
+    "mypy-extensions==1.0.0",           # Static typing extensions
+    "pre-commit==4.0.1",                # Pre-commit hooks system
+    "cfgv==3.4.0",                      # Configuration file validation
+    "identify==2.6.3",                  # File type identification
+    "nodeenv==1.9.1",                   # Isolated Node.js environment creation
+    "filelock==3.16.1",                 # File locking
+    "distlib==0.3.9",                   # Python distribution tools
+    "virtualenv==20.28.0",              # Virtual environment creation
+    "pip==25.0.1",                      # Package installer
+    "python-semantic-release>=9.21.0",  # Versioning and releasing
+    "platformdirs==4.3.6",              # Platform-specific paths detection
+    "packaging==24.2",                  # Packaging utilities
+]
+
+# Testing and application security tools
+test = [
+    "pytest==8.0.2",               # Testing framework
+    "pytest-cov>=6.0.0",           # Test coverage measurement
+    "pyasn1==0.6.1",               # ASN.1 implementation for Python
+    "rsa==4.9",                    # RSA encryption implementation
+    "ecdsa==0.19.0",               # ECDSA signatures implementation
+]
+
+[project.urls]
+Homepage = "https://github.com/RYZHAIEV-SERHII/Portfolio"
+Documentation = "https://github.com/RYZHAIEV-SERHII/Portfolio#readme"
+Repository = "https://github.com/RYZHAIEV-SERHII/Portfolio.git"
+Issues = "https://github.com/RYZHAIEV-SERHII/Portfolio/issues"
+
+[project.scripts]
+portfolio = "run:run_cli"                  # Entry point for running the application
+
+# Build system configuration
+[build-system]
+requires = ["hatchling"]           # Specifies that hatchling is needed for building
+build-backend = "hatchling.build"  # Defines the build backend
+
+# Configuration for wheel package building via hatch
+[tool.hatch.build.targets.wheel]
+packages = ["app", "api", "cli"]          # Packages to be included in the wheel
+
+# Version configuration via hatch
+[tool.hatch.version]
+path = "pyproject.toml:version"     # Path to the file where version is stored
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.9
+target-version = "py39"
+
+[lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = true
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
+
+# Pytest configuration for testing
+[tool.pytest.ini_options]
+minversion = "8.0"                 # Minimum pytest version
+addopts = "-ra -q --strict-markers --cov-report=term-missing --cov-report=html"  # Pytest run options
+testpaths = ["tests"]              # Test directories
+pythonpath = ["."]                 # Python module import paths
+
+# Code coverage collection settings
+[tool.coverage.run]
+branch = true                      # Enables branch coverage (checks all possible execution paths)
+source = ["app", "api", "cli"]     # Packages to measure coverage
+
+# Coverage report configuration
+[tool.coverage.report]
+exclude_lines = [                  # Line patterns to exclude from analysis
+    "pragma: no cover",            # Lines with 'no cover' directive
+    "def __repr__",                # Repr methods
+    "if self.debug:",              # Debugging code
+    "raise NotImplementedError",   # Stubs for unimplemented methods
+    "if __name__ == .__main__.:",  # Blocks executed on direct run
+    "pass",                        # Empty blocks
+    "raise ImportError",           # Import error handling
+]
+ignore_errors = true               # Ignore errors during report generation
+omit = [                           # Files to exclude from analysis
+    "tests/*",                     # Tests
+    "setup.py",                    # Setup file
+    "config.py",                   # Configuration file
+]
+
+# Automated version management configuration
+[tool.semantic_release]
+version_variables = [              # Paths to version variables that need to be updated
+    "pyproject.toml:version"       # Updates version in pyproject.toml
+]
+branch = false                     # Don't create a separate branch for release
+upload_to_pypi = false             # Don't upload package to PyPI
+build_command = "pip install uv && uv build"  # Command for building the project
+dist_path = "dist/"                # Path to the build artifacts directory
+remove_dist = true                 # Remove dist directory before building
+major_on_zero = false              # Don't increment major version at 0.x.x
+tag_format = "{version}"           # Git tag format
+commit_message = "chore(release): bump version to {version}"  # Commit message format
+changelog_file = "CHANGELOG.md"    # File for recording changes between versions
+
+# Commit message parsing configuration
+[tool.semantic_release.commit_parser_options]
+allowed_tags = [                   # Allowed types of changes in commit messages
+    "feat",                        # New features
+    "fix",                         # Bug fixes
+    "perf",                        # Performance improvements
+    "refactor",                    # Code refactoring
+    "style",                       # Style changes
+    "docs",                        # Documentation
+    "test",                        # Tests
+    "ci",                          # CI integration
+    "build",                       # Build system
+    "chore"                        # Other changes
+]
+minor_tags = ["feat"]              # Commit types that trigger minor version increment
+patch_tags = ["fix", "perf"]       # Commit types that trigger patch version increment
+
+# Main branch configuration
+[tool.semantic_release.branches.main]
+match = "main"                     # Pattern for identifying main branch
+prerelease = false                 # Don't consider releases on this branch as prereleases
+prerelease_token = ""              # Prerelease token (not used)
+
+# Release candidate branches configuration
+[tool.semantic_release.branches.rc]
+match = "rc/*"                     # Pattern for identifying RC branches
+prerelease = true                  # Consider releases on these branches as prereleases
+prerelease_token = "rc"            # Prerelease token (rc)
+
+# Beta branches configuration
+[tool.semantic_release.branches.beta]
+match = "beta/*"                   # Pattern for identifying beta branches
+prerelease = true                  # Consider releases on these branches as prereleases
+prerelease_token = "b"             # Prerelease token (b)
+
+# Alpha branches configuration
+[tool.semantic_release.branches.alpha]
+match = "alpha/*"                  # Pattern for identifying alpha branches
+prerelease = true                  # Consider releases on these branches as prereleases
+prerelease_token = "a"             # Prerelease token (a)
+
+# Prerelease tag formats according to PEP 440
+[tool.semantic_release.prerelease_tag_format]
+alpha = "{version}a{prerelease_offset}"         # Format for alpha releases (e.g. 0.6.12a1)
+beta = "{version}b{prerelease_offset}"          # Format for beta releases (e.g. 0.6.12b1)
+rc = "{version}rc{prerelease_offset}"           # Format for RC releases (e.g. 0.6.12rc1)
+
+# CHANGELOG file generation configuration
+[tool.semantic_release.changelog]
+changelog_sections = [             # Sections for changelog and their display
+    ["feat", "Features"],          # Feature commits -> Features section
+    ["fix", "Bug Fixes"],          # Fix commits -> Bug Fixes section
+    ["perf", "Performance"],       # Performance commits -> Performance section
+    ["refactor", "Code Refactoring"], # Refactoring commits -> Code Refactoring section
+    ["docs", "Documentation"],     # Documentation commits -> Documentation section
+]
