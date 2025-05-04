@@ -1,4 +1,20 @@
-# `Portfolio`
+# Portfolio
+
+![Portfolio Logo](https://i.imgur.com/OTqfqsf.png)
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/Flask-Framework-brightgreen.svg)](https://flask.palletsprojects.com/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Framework-009688.svg)](https://fastapi.tiangolo.com/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-red.svg)](https://www.sqlalchemy.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue.svg)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Container-2496ED.svg?logo=docker)](https://www.docker.com/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![codecov](https://codecov.io/gh/RYZHAIEV-SERHII/Portfolio/branch/main/graph/badge.svg)](https://codecov.io/gh/RYZHAIEV-SERHII/Portfolio)
+[![Tests](https://github.com/RYZHAIEV-SERHII/Portfolio/actions/workflows/tests.yml/badge.svg)](https://github.com/RYZHAIEV-SERHII/Portfolio/actions)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat&logo=github)](CONTRIBUTING.md)
 
 This is my personal portfolio website built using **Python**, **Flask**, **FastAPI**, **SQLAlchemy**, and
 **PostgreSQL**. The site showcases my projects, experience, and skills, while also serving as a backend API for future
@@ -45,7 +61,7 @@ integrations.
 
 ### Prerequisites
 
-- **Python 3.8+**
+- **Python 3.10+**
 - **PostgreSQL**
 - **Docker** (optional for deployment)
 
@@ -63,23 +79,57 @@ integrations.
     - Create a `.env` file in the root directory of the project.
     - Add the necessary environment variables as shown in the `.env.example` file.
 
-3. (Option 1) Install Python dependencies manually:
+3. (Option 1) Install Python dependencies manually using `uv`:
 
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-    - Start the Flask server:
-
-        ```bash
-        flask run
-        ```
-
-    - Start the FastAPI server:
+    - First, ensure you have `uv` installed. You can install it following the [official
+      `uv` instructions](https://github.com/astral-sh/uv#installation).
+    - Run the sync command. `uv` will automatically create a `.venv` virtual environment if one doesn't exist and
+      install the dependencies defined in `pyproject.toml`:
 
         ```bash
-        uvicorn api:app --reload
+        uv sync --all-extras
         ```
+
+    - Start the applications using the project's CLI script:
+        - `all`: Start both Flask (app) and FastAPI (api)
+
+        ```bash
+        python run.py start all
+       ```
+
+        - `app`: Start only Flask app
+
+       ```bash
+        python run.py start app
+        ```
+
+        - `api`: Start only FastAPI app
+
+       ```bash
+        python run.py start api
+        ```
+
+    - Stop the applications using the project's CLI script:
+      - `all`: Stop both Flask (app) and FastAPI (api)
+
+      ```bash
+        python run.py stop all
+      ```
+
+      - `app`: Stop only Flask app
+
+      ```bash
+      python run.py stop app
+      ```
+
+      - `api`: Stop only FastAPI app
+
+      ```bash
+      python run.py stop api
+      ```
+
+      The Flask app will be available at `http://localhost:5000` <br>
+      The FastAPI app at `http://localhost:8000`.
 
 4. (Option 2) Start the app using Docker:
 
@@ -98,46 +148,93 @@ pytest
 ```plaintext
 Portfolio/
 │
+├── .github/                      # GitHub configuration
+│   ├── workflows/                # GitHub Actions workflows for CI/CD
+│   │   ├── release.yaml          # Workflow for releases
+│   │   └── tests.yml             # Workflow for running tests
+│   └── codecov.yml               # Code coverage configuration
+│
 ├── .hooks/                       # Git hooks for pre-commit checks
+│   └── commit-msg                # Validates commit message format
 │
-├── .tools/                       # Utility scripts and tools for the project
+├── .tools/                       # Utility scripts and tools
+│   └── cp_env_to_env_example.sh  # Environment file management
 │
-├── api/                          # Contains API-related code (if any)
+├── alembic/                      # Database migration system
+│   └── versions/                 # Migration version files
 │
-├── app/
-│   ├── __init__.py               # Initializes the Flask app and configures extensions
-│   ├── db.py                     # Contains database initialization and utility functions
-│   ├── forms.py                  # Defines the forms used in the application, such as the contact form
-│   ├── mail.py                   # Manages email notifications
-│   ├── models.py                 # Defines the SQLAlchemy models for the database
-│   ├── static/                   # Contains static files (CSS, JavaScript, images)
-│   │   ├── css/                  # CSS files for styling the application
-│   │   ├── img/                  # Images used in the application
+├── api/                          # FastAPI application code
+│   ├── crud/                     # Database CRUD operations
+│   │   ├── about.py              # About section operations
+│   │   ├── contact.py            # Contact operations
+│   │   ├── education.py          # Education operations
+│   │   ├── experience.py         # Experience operations
+│   │   ├── project.py            # Project operations
+│   │   ├── resume.py             # Resume operations
+│   │   └── skill.py              # Skills operations
+│   ├── routes/                   # API endpoints
+│   │   ├── about.py              # About section endpoints
+│   │   ├── contact.py            # Contact endpoints
+│   │   ├── education.py          # Education endpoints
+│   │   ├── experiences.py        # Experience endpoints
+│   │   ├── projects.py           # Project endpoints
+│   │   ├── resume.py             # Resume endpoints
+│   │   ├── security.py           # Authentication endpoints
+│   │   └── skills.py             # Skills endpoints
+│   ├── schemas/                  # Data validation models
+│   ├── db.py                     # Database connection
+│   ├── main.py                   # FastAPI app initialization
+│   └── security.py               # Authentication utilities
+│
+├── app/                          # Flask application code
+│   ├── static/                   # Static assets
+│   │   ├── css/                  # Stylesheets
+│   │   ├── img/                  # Images for portfolio
 │   │   ├── js/                   # JavaScript files
-│   ├── templates/                # HTML templates for rendering pages
-│   └── views.py                  # Defines the routes and view functions for the application
+│   │   └── vendor/               # Third-party libraries
+│   ├── templates/                # HTML templates
+│   │   ├── auth/                 # Authentication templates
+│   │   ├── includes/             # Reusable components
+│   │   └── projects/             # Project templates
+│   ├── admin.py                  # Admin panel configuration
+│   ├── auth.py                   # Authentication logic
+│   ├── forms.py                  # Form definitions
+│   ├── mail.py                   # Email functionality
+│   └── views.py                  # Route handlers
 │
-├── migrations/                   # Database migration files generated by Flask-Migrate
+├── cli/                          # Command-line interface tools
+│   ├── operations.py             # CLI operations
+│   └── setup.py                  # Setup utilities
 │
-├── tests/                        # Unit tests for the application
+├── docs/                         # Documentation
+│   └── Enhancements.md           # Future enhancements
 │
-├── config.py                     # Configuration settings for different environments
-├── docker-compose.yaml           # Docker Compose configuration file
-├── Dockerfile_FastAPI            # Dockerfile for building the FastAPI container
-├── Dockerfile_Flask              # Dockerfile for building the Flask container
-├── .dockerignore                 # Docker ignore file
-├── .env                          # Environment variables configuration
-├── .env.example                  # Example of the .env file
-├── .flake8                       # Configuration for the flake8 linter
-├── .gitignore                    # Git ignore file
-├── LICENSE                       # License file for the project
-├── logging.conf                  # Logging configuration file
-├── logs/                         # Directory for log files
-├── .pre-commit-config.yaml       # Configuration for pre-commit hooks
-├── README.md                     # Project documentation file
-├── requirements.txt              # List of Python dependencies for the project
-├── ruff.toml                     # Configuration for the Ruff linter
-└── run.py                        # Entry point for running the Flask application
+├── src/                          # Shared code between Flask and FastAPI
+│   └── db/                       # Database models and services
+│       ├── models.py             # SQLAlchemy models
+│       └── services.py           # Database service functions
+│
+├── tests/                        # Test files
+│
+├── .dockerignore                 # Files to exclude from Docker builds
+├── .env                          # Environment variables (not in version control)
+├── .env.example                  # Example environment variables template
+├── .gitignore                    # Files to exclude from Git
+├── .pre-commit-config.yaml       # Pre-commit hooks configuration
+├── .python-version               # Python version specification
+├── CONTRIBUTING.md               # Contribution guidelines
+├── LICENSE                       # MIT License
+├── README.md                     # Project documentation
+├── alembic.ini                   # Alembic configuration
+├── config.py                     # Application configuration
+├── docker-compose.yaml           # Docker Compose configuration
+├── Dockerfile_FastAPI            # Dockerfile for FastAPI
+├── Dockerfile_Flask              # Dockerfile for Flask
+├── logging.conf                  # Logging configuration
+├── logging_setup.py              # Logging setup utilities
+├── pyproject.toml                # Project metadata and dependencies
+├── run.py                        # Application entry point
+└── uv.lock                       # Dependency lock file for uv package manager
 ```
 
 ## Future Enhancements
